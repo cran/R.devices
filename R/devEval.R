@@ -10,15 +10,14 @@
 # @synopsis
 #
 # \arguments{
-#   \item{type}{Specifies the type of device to be used by
-#     @see "R.utils::devNew".}
+#   \item{type}{Specifies the type of device to be used by @see "devNew".}
 #   \item{expr}{The @expression of graphing commands to be evaluated.}
 #   \item{envir}{The @environment where \code{expr} should be evaluated.}
 #   \item{name, tags}{The fullname name of the image is specified
 #     as the name with optional comma-separated tags appended.}
 #   \item{ext}{The filename extension of the image file generated, if any.
 #    By default, it is inferred from argument \code{type}.}
-#   \item{...}{Additional arguments passed to @see "R.utils::devNew".}
+#   \item{...}{Additional arguments passed to @see "devNew".}
 #   \item{filename}{The filename of the image saved, if any.
 #     See also below.}
 #   \item{path}{The directory where then image should be saved, if any.}
@@ -79,8 +78,9 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
   # Argument 'name' and 'tags':
   fullname <- paste(c(name, tags), collapse=",");
   fullname <- unlist(strsplit(fullname, split=",", fixed=TRUE));
-  fullname <- trim(fullname);
-  fullname <- fullname[nchar(fullname) > 0];
+  fullname <- sub("^[\t\n\f\r ]*", "", fullname); # trim tags
+  fullname <- sub("[\t\n\f\r ]*$", "", fullname); #
+  fullname <- fullname[nchar(fullname) > 0L];     # drop empty tags
   fullname <- paste(fullname, collapse=",");
 
   # Argument 'field':
@@ -129,7 +129,7 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
           # Rename incomplete image file to denote that
           # it is incomplete.
           pattern <- "^(.*)[.]([^.]*)$";
-          if (regexpr(pattern, pathname) != -1) {
+          if (regexpr(pattern, pathname) != -1L) {
             fullname <- gsub(pattern, "\\1", pathname);
             ext <- gsub(pattern, "\\2", pathname);
             fmtstr <- sprintf("%s,INCOMPLETE_%%03d.%s", fullname, ext);
@@ -138,7 +138,7 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
           }
 
           # Try to rename
-          for (kk in 1:999) {
+          for (kk in seq_len(999L)) {
             pathnameN <- sprintf(fmtstr, kk);
             if (isFile(pathnameN)) next;
             res <- file.rename(pathname, pathnameN);
@@ -172,6 +172,8 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
 
 ############################################################################
 # HISTORY: 
+# 2012-08-21
+# o DOCUMENTATION: Link to devNew() help was broken.
 # 2012-04-30
 # o Extracted devEval() to devEval.R.
 # 2012-04-05
