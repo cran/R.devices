@@ -29,7 +29,7 @@ devIsOpen <- function(which=dev.cur(), ...) {
   devList <- .devList();
   dev <- devList[which];
   label <- names(dev);
-  (!is.na(label) && dev[[1]] != "");
+  (!is.na(label) && dev[[1L]] != "");
 } # devIsOpen()
 
 
@@ -73,9 +73,9 @@ devList <- function(...) {
   idxs <- which(isOpen);
 
   # Exclude the "null" device
-  idxs <- idxs[-1];
+  idxs <- idxs[-1L];
 
-  if (length(idxs) == 0)
+  if (length(idxs) == 0L)
     idxs <- NULL;
 
   idxs;
@@ -116,8 +116,8 @@ devGetLabel <- function(which=dev.cur(), ...) {
   devList <- .devList();
   dev <- devList[which];
   label <- names(dev);
-  if (is.na(label) || dev[[1]] == "")
-    stop("No such device: ", which);
+  if (is.na(label) || dev[[1L]] == "")
+    throw("No such device: ", which);
   label;
 } # devGetLabel()
 
@@ -158,7 +158,7 @@ devSetLabel <- function(which=dev.cur(), label, ...) {
     which <- .devIndexOf(which);
   devList <- .devList();
   if (devList[[which]] == "")
-    stop("No such device: ", which);
+    throw("No such device: ", which);
 
   # Update the label
   if (is.null(label))
@@ -208,8 +208,8 @@ devSet <- function(which=dev.next(), ...) {
   args <- list(...);
 
   # Argument 'which':
-  if (!is.numeric(which) || length(which) != 1) {
-    if (length(which) != 1 || !is.character(which)) {
+  if (!is.numeric(which) || length(which) != 1L) {
+    if (length(which) != 1L || !is.character(which)) {
       require("digest") || throw("Package not loaded: digest");
       which <- digest(which);
     }
@@ -223,8 +223,8 @@ devSet <- function(which=dev.next(), ...) {
     }
   }
 
-  if (which < 2) {
-    stop("Cannot set device: ", which);
+  if (which < 2L) {
+    throw("Cannot set device: ", which);
   }
 
 
@@ -235,15 +235,15 @@ devSet <- function(which=dev.next(), ...) {
 
   # Identify set devices that needs to be opened inorder for
   # the next device to get the requested index
-  if (which == 2) {
+  if (which == 2L) {
     toBeOpened <- c();
   } else {
-    toBeOpened <- setdiff(2:(which-1), dev.list());
+    toBeOpened <- setdiff(2:(which-1L), dev.list());
   }
 
   toBeClosed <- list();
   len <- length(toBeOpened);
-  if (len > 0) {
+  if (len > 0L) {
     for (idx in toBeOpened) {
       # Create a dummy postscript device (which is non-visible)
       pathname <- tempfile();
@@ -256,7 +256,7 @@ devSet <- function(which=dev.next(), ...) {
   res <- do.call("devNew", args=args);
 
   # Close temporarily opened devices
-  for (kk in seq(along=toBeClosed)) {
+  for (kk in seq_along(toBeClosed)) {
     pathname <- toBeClosed[[kk]];
     if (!is.null(pathname)) {
       dev.set(kk);
@@ -347,12 +347,12 @@ devOff <- function(which=dev.cur(), ...) {
 #*/########################################################################### 
 devDone <- function(which=dev.cur(), ...) {
   # Do nothing?
-  if (is.numeric(which) && length(which) == 1 && which <= 1) {
+  if (is.numeric(which) && length(which) == 1L && which <= 1L) {
     return(invisible());
   }
 
   which <- devSet(which);
-  if (which != 1) {
+  if (which != 1L) {
     type <- tolower(names(which));
     type <- gsub(":.*", "", type);
     
@@ -382,8 +382,8 @@ devDone <- function(which=dev.cur(), ...) {
   } else {
     # Update the names
     labels <- names(devList);
-    idxs <- which(nchar(labels) == 0);
-    if (length(idxs) > 0) {
+    idxs <- which(nchar(labels) == 0L);
+    if (length(idxs) > 0L) {
       labels[idxs] <- paste("Device", idxs, sep=" ");
     }
     names(devList) <- labels;
@@ -397,7 +397,7 @@ devDone <- function(which=dev.cur(), ...) {
   idx <- match(label, names(devList));
   if (is.na(idx) || devList[[idx]] == "") {
     if (error)
-      stop("No such device: ", label);
+      throw("No such device: ", label);
   }
   idx;
 } # .devIndexOf()
@@ -407,13 +407,13 @@ devDone <- function(which=dev.cur(), ...) {
   # All open devices
   devList <- dev.list();
 
-  if (length(devList) == 0)
-    return(as.integer(2));
+  if (length(devList) == 0L)
+    return(2L);
 
-  devPossible <- seq(from=2, to=max(devList)+1);
+  devPossible <- seq(from=2L, to=max(devList)+1L);
   devFree <- setdiff(devPossible, devList);
 
-  devFree[1];
+  devFree[1L];
 } # .devNextAvailable()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -422,6 +422,8 @@ devDone <- function(which=dev.cur(), ...) {
 
 ############################################################################
 # HISTORY: 
+# 2012-11-18
+# o Replaced all stop() with throw().
 # 2012-04-30
 # o Moved devNew() to devNew.R.
 # o Moved devEval() to devEval.R.
