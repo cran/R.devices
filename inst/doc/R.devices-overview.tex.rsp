@@ -1,13 +1,16 @@
+<%-------------------------------------------------------------------
+  DIRECTIVES FOR R:
+
+  %\VignetteIndexEntry{R.devices overview}
+  %\VignetteKeyword{devices, graphics, plots, figures}
+  %\VignetteEngine{R.rsp::rsp}
+  -------------------------------------------------------------------%>
+
 <% t0 <- Sys.time() %>
 
 <%
 library("R.devices");
 pkg <- Package("R.devices");
-
-# Workaround (to be removed when R.utils has been cleaned up)
-devOptions <- R.devices::devOptions;
-devEval <- R.devices::devEval;
-devNew <- R.devices::devNew;
 
 devOptions("png", width=840);
 options(width=85);
@@ -236,17 +239,6 @@ This is why we recommend to always use \code{devNew()} in place of \code{dev.new
 
 
 
-
-
-
-
-<%-------------------------------------------------------------------
-  REFERENCES
-  -------------------------------------------------------------------%>
-%\bibliographystyle{natbib}
-%\bibliography{PSCBS}
-
-
 <%-------------------------------------------------------------------
   APPENDIX
   -------------------------------------------------------------------%>
@@ -254,7 +246,7 @@ This is why we recommend to always use \code{devNew()} in place of \code{dev.new
 \section*{Appendix}
 \subsection*{Session information}
 <%=toLatex(sessionInfo())%>
-This report was automatically generated using \code{rsp()} of the R.rsp package.
+This report was automatically generated using \code{rfile()} of the R.rsp package.
 Total processing time after RSP-to-R translation was <%=dt <- round(Sys.time()-t0, digits=2)%> <%=attr(dt, "units")%>.
 
 \end{document}
