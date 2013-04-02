@@ -2,6 +2,36 @@
 Package: R.devices
 ==================
 
+Version: 2.2.2 [2013-04-01]
+o Now package builds with both R.rsp (< 0.9.1) and R.rsp (>= 0.9.1).
+
+
+Version: 2.2.1 [2013-03-28]
+o Bumped up package dependencies.
+o Cleaned up the NAMESPACE file.
+
+
+Version: 2.2.0 [2013-03-07]
+o DOCUMENTATION: Preparing package vignettes for the upcoming 
+  R 3.0.0 support for non-Sweave vignettes.
+o Bumped up package dependencies.
+
+
+Version: 2.1.6 [2013-02-13]
+o Changed default argument 'field' for devEval() from NULL to
+  getOption("devEval/args/field", NULL).
+o Changed default argument 'field' for toNNN() from "fullname"
+  to getOption("devEval/args/field", "fullname").
+
+
+Version: 2.1.5 [2013-02-13]
+o Specifying new DESCRIPTION field 'VignetteBuilder'.
+
+
+Version: 2.1.4 [2012-12-19]
+o Utilizing new startupMessage() of R.oo.
+
+
 Version: 2.1.3 [2012-11-19]
 o DOCUMENTATION: Minor corrections and clarifications in the vignette.
 o CONSISTENCY: Now using throw() instead of stop() everywhere.
