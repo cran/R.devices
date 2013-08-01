@@ -5,11 +5,13 @@ importFrom("R.methodsS3", "throw")
 
 importFrom("R.oo", "Package")
 importFrom("R.oo", "getPosition")
-importFrom("R.oo", "getName")
-importFrom("R.oo", "getVersion")
-importFrom("R.oo", "getDate")
+importFrom("R.oo", "startupMessage")
 
 import("R.utils")
+## Arguments$... methods:
+##  getWritablePathname(), getCharacter(), getLogical(), getDouble()
+## importFrom("R.utils", "Arguments")
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # EXPORTS
@@ -29,7 +31,9 @@ export("jpeg2")
 export("png2")
 export("toBMP")
 export("toEPS")
+export("toEMF")
 export("toPDF")
 export("toPNG")
 export("toSVG")
 export("toTIFF")
+export("toWMF")

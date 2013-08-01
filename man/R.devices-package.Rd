@@ -15,12 +15,12 @@
 
 
 \description{
-  This package provides utility methods that enhance the existing graphical device functions already available in R for the purpose of simplifying the creation of figure files of various image formats and much more.
+  This package provides functions for creating plots and image files in a unified way regardless of output format (EPS, PDF, PNG, SVG, TIFF, WMF, etc.).  Default device options as well as scales and aspect ratios are controlled in a uniform way across all device types.  Switching output format requires minimal changes in code.  This package is ideal for large-scale batch processing, because it will never leave open graphics devices or incomplete image files behind, even on errors or user interrupts.
 }
 
 \section{To get started}{
   \itemize{
-   \item See the package vignettes.
+   \item Vignette '\href{../doc/index.html}{R.devices overview}'
    \item \code{\link{toEPS}}(), \code{\link{toPDF}}(), \code{\link{toPNG}}(), ... - evaluate
          graphics code and atomically save plot to a figure file.
   }
@@ -30,10 +30,10 @@
   To cite this package, please use:
 \preformatted{
 @Manual{,
-  title = {R.devices: Enhanced methods for handling graphical devices},
+  title = {R.devices: Unified handling of graphics devices},
   author = {Henrik Bengtsson},
   year = {2013},
-  note = {R package version 2.2.0},
+  note = {R package version 2.5.0},
 }
 }
 }

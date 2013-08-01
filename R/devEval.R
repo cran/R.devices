@@ -6,15 +6,15 @@
 # \description{
 #  @get "title".
 # }
-# 
+#
 # @synopsis
 #
 # \arguments{
 #   \item{type}{Specifies the type of device to be used by @see "devNew".}
 #   \item{expr}{The @expression of graphing commands to be evaluated.}
 #   \item{envir}{The @environment where \code{expr} should be evaluated.}
-#   \item{name, tags}{The fullname name of the image is specified
-#     as the name with optional comma-separated tags appended.}
+#   \item{name, tags, sep}{The fullname name of the image is specified
+#     as the name with optional \code{sep}-separated tags appended.}
 #   \item{ext}{The filename extension of the image file generated, if any.
 #    By default, it is inferred from argument \code{type}.}
 #   \item{...}{Additional arguments passed to @see "devNew".}
@@ -63,25 +63,30 @@
 #
 # @keyword device
 # @keyword utilities
-#*/########################################################################### 
-devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags=NULL, ..., ext=substitute(type), filename=sprintf("%s.%s", paste(c(name, tags), collapse=","), ext), path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-  # Local functions
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+#*/###########################################################################
+devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=substitute(type), filename=sprintf("%s.%s", paste(c(name, tags), collapse=sep), ext), path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
+  # WORKAROUND: Until Arguments$...() can be called without
+  # attaching R.utils. /HB 2013-07-03
+  pkgName <- "R.utils";
+  require(pkgName, character.only=TRUE) || throw("Package not loaded: R.utils");
 
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Local functions
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Validate arguments
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Argument 'filename' & 'path':
   pathname <- Arguments$getWritablePathname(filename, path=path);
 
   # Argument 'name' and 'tags':
-  fullname <- paste(c(name, tags), collapse=",");
-  fullname <- unlist(strsplit(fullname, split=",", fixed=TRUE));
+  fullname <- paste(c(name, tags), collapse=sep);
+  fullname <- unlist(strsplit(fullname, split=sep, fixed=TRUE));
   fullname <- sub("^[\t\n\f\r ]*", "", fullname); # trim tags
   fullname <- sub("[\t\n\f\r ]*$", "", fullname); #
   fullname <- fullname[nchar(fullname) > 0L];     # drop empty tags
-  fullname <- paste(fullname, collapse=",");
+  fullname <- paste(fullname, collapse=sep);
 
   # Argument 'field':
   if (!is.null(field)) {
@@ -106,13 +111,15 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
     path = path,
     pathname = pathname
   );
+  class(res) <- c("DevEvalFile", class(res));
 
   if (force || !isFile(pathname)) {
     done <- FALSE;
 
-    devNew(type, pathname, ...);
+    devIdx <- devNew(type, pathname, ...);
     on.exit({
-      devDone();
+      # Make sure to close the device (the same that was opened)
+      devDone(devIdx);
 
       # Archive file?
       if (isPackageLoaded("R.archive")) {
@@ -141,9 +148,9 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
           for (kk in seq_len(999L)) {
             pathnameN <- sprintf(fmtstr, kk);
             if (isFile(pathnameN)) next;
-            res <- file.rename(pathname, pathnameN);
+            resT <- file.rename(pathname, pathnameN);
             # Done?
-            if (res && isFile(pathnameN)) {
+            if (resT && isFile(pathnameN)) {
               pathname <- pathnameN;
               break;
             }
@@ -156,7 +163,7 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
         } # if (onIncomplete == ...)
       } # if (!done && isFile(...))
     }, add=TRUE);
-  
+
     eval(expr, envir=envir);
     done <- TRUE;
   }
@@ -172,6 +179,16 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
 
 ############################################################################
 # HISTORY:
+# 2013-07-29
+# o Now devEval() returns a list of class 'DevEvalFile'.
+# 2013-07-15
+# o Added argument 'sep' to devEval() together with an option to set
+#   its default value.
+# 2013-04-04
+# o ROBUSTNESS: Now devEval() does a better job of making sure to close
+#   the same device as it opened.  Previously it would close the current
+#   active device, which would not be the correct one if for instance
+#   other devices had been open in the meanwhile/in parallel.
 # 2013-02-23
 # o Now argument 'field' for devEval() defaults to
 #   getOption("devEval/args/field", NULL).
@@ -195,11 +212,11 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
 # 2011-04-12
 # o Now devEval("jpg", ...) is recognized as devEval("jpeg", ...).
 # 2011-03-29
-# o Now argument 'force' of devEval() defaults to 
+# o Now argument 'force' of devEval() defaults to
 #   getOption("devEval/args/force", TRUE).
 # 2011-03-18
 # o Now devEval() does a better job of "cleaning up" 'name' and 'tags'.
-# o Now argument 'path' of devEval() defaults to 
+# o Now argument 'path' of devEval() defaults to
 #   getOption("devEval/args/path", "figures/").
 # 2011-03-16
 # o Now R.archive:ing is only done if the R.archive package is loaded.
