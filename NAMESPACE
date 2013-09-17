@@ -2,10 +2,15 @@
 # IMPORTS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 importFrom("R.methodsS3", "throw")
+importFrom("R.methodsS3", "setMethodS3")
 
 importFrom("R.oo", "Package")
 importFrom("R.oo", "getPosition")
 importFrom("R.oo", "startupMessage")
+importFrom("R.oo", "setConstructorS3")
+importFrom("R.oo", "extend")
+importFrom("R.oo", "BasicObject")
+importFrom("R.oo", "[[.BasicObject")
 
 import("R.utils")
 ## Arguments$... methods:
@@ -18,6 +23,7 @@ import("R.utils")
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 export("devEval")
 export("devIsOpen")
+export("devIsInteractive")
 export("devList")
 export("devGetLabel")
 export("devSetLabel")
@@ -29,6 +35,7 @@ export("devOptions")
 export("eps")
 export("jpeg2")
 export("png2")
+
 export("toBMP")
 export("toEPS")
 export("toEMF")
@@ -37,3 +44,26 @@ export("toPNG")
 export("toSVG")
 export("toTIFF")
 export("toWMF")
+
+export("DevEvalProduct")
+export("DevEvalFileProduct")
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# DECLARATIONS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+S3method("as.character", "DevEvalProduct")
+S3method("getFullname", "DevEvalProduct")
+S3method("getName", "DevEvalProduct")
+S3method("getTags", "DevEvalProduct")
+S3method("getType", "DevEvalProduct")
+S3method("[[", "DevEvalProduct")
+S3method("$", "DevEvalProduct")
+
+S3method("as.character", "DevEvalFileProduct")
+S3method("getPathname", "DevEvalFileProduct")
+S3method("getPath", "DevEvalFileProduct")
+S3method("getFilename", "DevEvalFileProduct")
+S3method("getMimeType", "DevEvalFileProduct")
+S3method("getMime", "DevEvalFileProduct")
+S3method("getFullname", "DevEvalFileProduct")
+S3method("getDataURI", "DevEvalFileProduct")

@@ -6,9 +6,11 @@
 ## Metadata 'keywords': 'devices, graphics, plots, figures'
 ###########################################################################
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 t0 <- Sys.time()
 library("R.devices");
+R.rsp <- R.oo::Package("R.rsp")
+evalWithEcho <- R.rsp::evalWithEcho
+hpaste <- R.utils::hpaste
 
 devOptions("png", width=840);
 options(width=85);
@@ -16,7 +18,7 @@ options(digits=3);
 options(str=strOptions(strict.width="cut"));
 R.rsp$version
 R.rsp$author
-format(as.Date(getDate(R.devices)), format="%B %d, %Y")
+format(as.Date(R.devices$date), format="%B %d, %Y")
 envir <- getNamespace("R.devices");
 tos <- ls(pattern="^to[A-Z][a-zA-Z]+", envir=envir);
 tos <- sprintf("%s()", tos);
@@ -40,4 +42,6 @@ devOptions()[,c("width", "height", "bg", "fg", "pointsize")]
 toLatex(sessionInfo())
 dt <- round(Sys.time()-t0, digits=2)
 attr(dt, "units")
-
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## RSP source code script [END]
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

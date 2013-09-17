@@ -85,6 +85,7 @@ devNew <- function(type=getOption("device"), ..., scale=1, aspectRatio=1, par=NU
   if (is.function(type)) {
   } else {
     type <- as.character(type);
+    type <- .devTypeName(type);
   }
 
   # Argument 'scale':
@@ -196,24 +197,11 @@ devNew <- function(type=getOption("device"), ..., scale=1, aspectRatio=1, par=NU
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # Device type aliases?
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  if (is.character(type)) {
-    if (type == "jpg") {
-      type <- "jpeg";
-    }
-  }
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Exclude 'file' and 'filename' arguments?
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  if (is.character(type)) {
-    knownInteractive <- grDevices:::.known_interactive.devices;
-    if (is.element(tolower(type), tolower(knownInteractive))) {
-      keep <- !is.element(names(args), c("file", "filename"));
-      args <- args[keep];
-    }
+  if (devIsInteractive(type)) {
+    keep <- !is.element(names(args), c("file", "filename"));
+    args <- args[keep];
   }
 
 
@@ -241,6 +229,8 @@ devNew <- function(type=getOption("device"), ..., scale=1, aspectRatio=1, par=NU
 
 ############################################################################
 # HISTORY:
+# 2013-08-27
+# o Now devNew() utilizes devIsInteractive().
 # 2013-07-03
 # o Now devNew() returns the index of the opened device.
 # 2012-11-18

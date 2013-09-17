@@ -31,11 +31,11 @@
 # }
 #
 # \value{
-#   Returns a named @list with items specifying for instance
-#   the pathname, the fullname etc of the generated image.
-#   If argument \code{field} is given, then the value of the
-#   corresponding element is returned.
-#   \emph{Note that the return value may be changed in future releases.}
+#   Returns a @see "DevEvalFileProduct" if the device generated an
+#   image file, otherwise an @see "DevEvalProduct".
+#   If argument \code{field} is given, then the field of the
+#   @see "DevEvalProduct" is returned instead.
+#   \emph{Note that the default return value may be changed in future releases.}
 # }
 #
 # \section{Generated image file}{
@@ -64,7 +64,7 @@
 # @keyword device
 # @keyword utilities
 #*/###########################################################################
-devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=substitute(type), filename=sprintf("%s.%s", paste(c(name, tags), collapse=sep), ext), path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
+devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=if (is.character(type)) type else substitute(type), filename=sprintf("%s.%s", paste(c(name, tags), collapse=sep), ext), path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
   # WORKAROUND: Until Arguments$...() can be called without
   # attaching R.utils. /HB 2013-07-03
   pkgName <- "R.utils";
@@ -77,6 +77,13 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Validate arguments
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Argument 'type':
+  if (is.function(type)) {
+  } else {
+    type <- as.character(type);
+    type <- .devTypeName(type);
+  }
+
   # Argument 'filename' & 'path':
   pathname <- Arguments$getWritablePathname(filename, path=path);
 
@@ -100,26 +107,27 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
   force <- Arguments$getLogical(force);
 
 
+  # An interactive/non-file device?
+  isInteractive <- devIsInteractive(type);
 
   # Result object
-  res <- list(
-    type = type,
-    name = name,
-    tags = tags,
-    fullname = fullname,
-    filename = filename,
-    path = path,
-    pathname = pathname
-  );
-  class(res) <- c("DevEvalFile", class(res));
+  if (isInteractive) {
+    res <- DevEvalProduct(name=name, tags=tags, type=type);
+  } else {
+    res <- DevEvalFileProduct(pathname, type=type);
+  }
 
   if (force || !isFile(pathname)) {
     done <- FALSE;
 
-    devIdx <- devNew(type, pathname, ...);
+    if (isInteractive) {
+      devIdx <- devNew(type, ...);
+    } else {
+      devIdx <- devNew(type, pathname, ...);
+    }
     on.exit({
       # Make sure to close the device (the same that was opened)
-      devDone(devIdx);
+      if (!is.null(devIdx)) devDone(devIdx);
 
       # Archive file?
       if (isPackageLoaded("R.archive")) {
@@ -168,6 +176,14 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
     done <- TRUE;
   }
 
+  # Close it here to make sure the image file is created.
+  # This is needed if field="dataURI" (which triggers are read
+  # of the image file).
+  if (done) {
+    devDone(devIdx);
+    devIdx <- NULL;
+  }
+
   # Subset?
   if (!is.null(field)) {
     res <- res[[field]];
@@ -179,6 +195,11 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
 
 ############################################################################
 # HISTORY:
+# 2013-08-27
+# o Now devEval() utilizes devIsInteractive().
+# 2013-08-17
+# o BUG FIX/ROBUSTNESS: Argument 'ext' of devEval() can now be inferred
+#   from argument 'type' also when 'type' is passed via a string variable.
 # 2013-07-29
 # o Now devEval() returns a list of class 'DevEvalFile'.
 # 2013-07-15

@@ -363,6 +363,60 @@ devDone <- function(which=dev.cur(), ...) {
 } # devDone()
 
 
+###########################################################################/**
+# @RdocFunction devIsInteractive
+#
+# @title "Checks whether a device type is interactive or not"
+#
+# \description{
+#  @get "title".
+# }
+#
+# @synopsis
+#
+# \arguments{
+#   \item{type}{A @character string.}
+#   \item{...}{Not used.}
+# }
+#
+# \value{
+#   Returns @TRUE if the device type is interactive, otherwise @FALSE.
+# }
+#
+# @author
+#
+# \seealso{
+#   Internally, @see "grDevices::deviceIsInteractive" is used.
+# }
+#
+# @keyword device
+# @keyword utilities
+#*/###########################################################################
+devIsInteractive <- function(type, ...) {
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Validate arguments
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Argument 'type':
+  if (is.function(type)) {
+  } else {
+    type <- as.character(type);
+  }
+
+
+  # Nothing to do?
+  if (!is.character(type)) {
+    return(FALSE);
+  }
+
+  # Device type aliases?
+  type <- .devTypeName(type);
+
+  # A known interactive device?
+  knownInteractive <- grDevices::deviceIsInteractive();
+  res <- is.element(tolower(type), tolower(knownInteractive));
+
+  res;
+} # devIsInteractive()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # BEGIN: Local functions
@@ -416,12 +470,30 @@ devDone <- function(which=dev.cur(), ...) {
   devFree[1L];
 } # .devNextAvailable()
 
+.devTypeName <- function(type, ...) {
+  # Nothing todo?
+  if (!is.character(type) || length(type) == 0L) {
+    return(type);
+  }
+
+  type <- tolower(type);
+
+  # Common aliases
+  type[type == "jpg"] <- "jpeg";
+  type[type == "ps"] <- "postscript";
+
+  type;
+} # .devTypeName()
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # END: Local functions
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ############################################################################
 # HISTORY:
+# 2013-08-27
+# o Added devIsInteractive().
+# o Added .devTypeName().
 # 2012-11-18
 # o Replaced all stop() with throw().
 # 2012-04-30
