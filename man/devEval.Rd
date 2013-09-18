@@ -18,7 +18,8 @@
 
 \usage{
 devEval(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags=NULL,
-  sep=getOption("devEval/args/sep", ","), ..., ext=substitute(type),
+  sep=getOption("devEval/args/sep", ","), ...,
+  ext=if (is.character(type)) type else substitute(type),
   filename=sprintf("\%s.\%s", paste(c(name, tags), collapse = sep), ext),
   path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field",
   NULL), onIncomplete=c("remove", "rename", "keep"),
@@ -47,11 +48,11 @@ devEval(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags
 }
 
 \value{
-  Returns a named \code{\link[base]{list}} with items specifying for instance
-  the pathname, the fullname etc of the generated image.
-  If argument \code{field} is given, then the value of the
-  corresponding element is returned.
-  \emph{Note that the return value may be changed in future releases.}
+  Returns a \code{\link{DevEvalFileProduct}} if the device generated an
+  image file, otherwise an \code{\link{DevEvalProduct}}.
+  If argument \code{field} is given, then the field of the
+  \code{\link{DevEvalProduct}} is returned instead.
+  \emph{Note that the default return value may be changed in future releases.}
 }
 
 \section{Generated image file}{
@@ -74,11 +75,18 @@ res <- devEval("png", name="MyPlot", tags=c("10", "rnd"), aspectRatio=0.7, {
 print(res$pathname)
 # [1] "figures/MyPlot,10,rnd.png"
 
+if (R.utils::isPackageInstalled("base64enc")) {
+  str(res$dataURI)
+  # chr "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAA..."
+}
+
+
 res <- devEval("pdf", name="MyPlot", tags=c("10", "rnd"), aspectRatio=0.7, {
   plot(1:10)
 })
 print(res$pathname)
 # [1] "figures/MyPlot,10,rnd.pdf"
+
 
 res <- devEval("eps", name="MyPlot", tags=c("10", "rnd"), aspectRatio=0.7, {
   plot(1:10)
