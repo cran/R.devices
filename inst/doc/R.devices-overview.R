@@ -4,6 +4,7 @@
 ## Metadata 'title': 'R.devices overview'
 ## Metadata 'author': 'Henrik Bengtsson'
 ## Metadata 'keywords': 'devices, graphics, plots, figures'
+## Metadata 'engine': 'R.rsp::rsp'
 ###########################################################################
 
 t0 <- Sys.time()
@@ -42,6 +43,3 @@ devOptions()[,c("width", "height", "bg", "fg", "pointsize")]
 toLatex(sessionInfo())
 dt <- round(Sys.time()-t0, digits=2)
 attr(dt, "units")
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## RSP source code script [END]
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

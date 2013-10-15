@@ -1,7 +1,7 @@
 ###########################################################################/**
 # @RdocFunction devEval
 #
-# @title "Opens a new device, evaluate (graphing) code, and closes device"
+# @title "Opens a new graphics device, evaluate (graphing) code, and closes device"
 #
 # \description{
 #  @get "title".
@@ -10,8 +10,13 @@
 # @synopsis
 #
 # \arguments{
-#   \item{type}{Specifies the type of device to be used by @see "devNew".}
+#   \item{type}{Specifies the type of graphics device to be used.
+#    The device is created and opened using @see "devNew".
+#    Multiple types may be specified.}
 #   \item{expr}{The @expression of graphing commands to be evaluated.}
+#   \item{initially, finally}{Optional @expression:s to be evaluated
+#    before and after \code{expr}. If \code{type} specifies multiple
+#    devices, these optional @expression:s are only evaluated ones.}
 #   \item{envir}{The @environment where \code{expr} should be evaluated.}
 #   \item{name, tags, sep}{The fullname name of the image is specified
 #     as the name with optional \code{sep}-separated tags appended.}
@@ -19,7 +24,8 @@
 #    By default, it is inferred from argument \code{type}.}
 #   \item{...}{Additional arguments passed to @see "devNew".}
 #   \item{filename}{The filename of the image saved, if any.
-#     See also below.}
+#    By default, it is composed of arguments \code{name}, \code{tags},
+#    \code{sep}, and \code{ext}.  See also below.}
 #   \item{path}{The directory where then image should be saved, if any.}
 #   \item{field}{An optional @character string specifying a specific
 #     field of the named result @list to be returned.}
@@ -64,36 +70,81 @@
 # @keyword device
 # @keyword utilities
 #*/###########################################################################
-devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="Rplot", tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=if (is.character(type)) type else substitute(type), filename=sprintf("%s.%s", paste(c(name, tags), collapse=sep), ext), path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
-  # WORKAROUND: Until Arguments$...() can be called without
-  # attaching R.utils. /HB 2013-07-03
-  pkgName <- "R.utils";
-  require(pkgName, character.only=TRUE) || throw("Package not loaded: R.utils");
+devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL, envir=parent.frame(), name="Rplot", tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=NULL, filename=NULL, path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Vectorized version
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Nothing to do?
+  if (length(type) == 0L) {
+    return(structure(character(0L), class=class(DevEvalProduct())));
+  }
 
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # Local functions
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Parse 'type' in case multiple types is specified in one string
+  if (is.character(type)) {
+    type <- unlist(strsplit(type, split=","), use.names=FALSE);
+    type <- trim(type);
+  }
+
+  if (length(type) > 1L) {
+    types <- type;
+    # Expression must be substitute():d to avoid the being evaluated here
+    expr <- substitute(expr);
+
+    # Evaluate 'initially' only once
+    eval(initially, envir=envir);
+
+    # Evaluate 'expr' once per graphics device
+    res <- lapply(types, FUN=function(type) {
+      devEval(type=type, expr=expr, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force);
+    });
+    names(res) <- types;
+
+    # Evaluate 'finally' only once
+    eval(finally, envir=envir);
+
+    return(res);
+  }
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Validate arguments
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Argument 'type':
+  # Sanity check
+  if (length(type) != 1L) {
+    throw("Argument 'type' must be a single object: ", length(type));
+  }
   if (is.function(type)) {
   } else {
     type <- as.character(type);
     type <- .devTypeName(type);
   }
 
-  # Argument 'filename' & 'path':
-  pathname <- Arguments$getWritablePathname(filename, path=path);
-
-  # Argument 'name' and 'tags':
+  # Argument 'name', 'tags' and 'sep':
   fullname <- paste(c(name, tags), collapse=sep);
   fullname <- unlist(strsplit(fullname, split=sep, fixed=TRUE));
   fullname <- sub("^[\t\n\f\r ]*", "", fullname); # trim tags
   fullname <- sub("[\t\n\f\r ]*$", "", fullname); #
   fullname <- fullname[nchar(fullname) > 0L];     # drop empty tags
   fullname <- paste(fullname, collapse=sep);
+  parts <- unlist(strsplit(fullname, split=sep, fixed=TRUE));
+  name <- parts[1L];
+  tags <- parts[-1L];
+
+  # Argument 'ext':
+  if (is.null(ext)) {
+    if (is.character(type)) {
+      ext <- type;
+    } else {
+      ext <- substitute(type);
+      ext <- as.character(ext);
+    }
+  }
+
+  # Argument 'filename' & 'path':
+  if (is.null(filename)) {
+    filename <- sprintf("%s.%s", fullname, ext);
+  }
+  pathname <- Arguments$getWritablePathname(filename, path=path);
 
   # Argument 'field':
   if (!is.null(field)) {
@@ -117,9 +168,8 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
     res <- DevEvalFileProduct(pathname, type=type);
   }
 
+  done <- FALSE;
   if (force || !isFile(pathname)) {
-    done <- FALSE;
-
     if (isInteractive) {
       devIdx <- devNew(type, ...);
     } else {
@@ -172,13 +222,17 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
       } # if (!done && isFile(...))
     }, add=TRUE);
 
+    # Evaluate 'initially', 'expr' and 'finally' (in that order)
+    eval(initially, envir=envir);
     eval(expr, envir=envir);
+    eval(finally, envir=envir);
+
     done <- TRUE;
   }
 
   # Close it here to make sure the image file is created.
-  # This is needed if field="dataURI" (which triggers are read
-  # of the image file).
+  # This is needed if field="dataURI" (which triggers a
+  # reading the image file).
   if (done) {
     devDone(devIdx);
     devIdx <- NULL;
@@ -195,6 +249,18 @@ devEval <- function(type=getOption("device"), expr, envir=parent.frame(), name="
 
 ############################################################################
 # HISTORY:
+# 2013-09-27
+# o BUG FIX: devEval() could generate "Error in devEval(type = "...",
+#   name = name, ..., field = field) : object 'done' not found".
+# 2013-09-25
+# o Added arguments 'initially' and 'finally'.
+# o Vectorized devEval().
+# o Updated the formal defaults of several devEval() arguments to be NULL.
+#   Instead, NULL for such arguments are translated to default internally.
+#   This makes it easier/possible to vectorize devEval().
+# 2013-09-24
+# o ROBUSTNESS: Now devEval() gives an error if argument 'type' is not
+#   of length one.  However, eventually devEval() will be vectorized.
 # 2013-08-27
 # o Now devEval() utilizes devIsInteractive().
 # 2013-08-17

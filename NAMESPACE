@@ -3,24 +3,38 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 importFrom("R.methodsS3", "throw")
 importFrom("R.methodsS3", "setMethodS3")
-
-importFrom("R.oo", "Package")
-importFrom("R.oo", "getPosition")
-importFrom("R.oo", "startupMessage")
 importFrom("R.oo", "setConstructorS3")
 importFrom("R.oo", "extend")
-importFrom("R.oo", "BasicObject")
-importFrom("R.oo", "[[.BasicObject")
 
-import("R.utils")
-## Arguments$... methods:
-##  getWritablePathname(), getCharacter(), getLogical(), getDouble()
-## importFrom("R.utils", "Arguments")
+## importFrom("R.oo", "[[.BasicObject")
+
+## Importing functions
+importFrom("R.oo", "BasicObject")
+importFrom("R.oo", "Package")
+importFrom("R.oo", "startupMessage")
+importFrom("R.oo", "trim")
+importFrom("R.utils", "capitalize")
+importFrom("R.utils", "getOption") ## Multi-sources: R.utils, base
+importFrom("R.utils", "getRelativePath")
+importFrom("R.utils", "hpaste")
+importFrom("R.utils", "inherits") ## Multi-sources: R.utils, base
+importFrom("R.utils", "isFile")
+importFrom("R.utils", "isPackageInstalled")
+importFrom("R.utils", "isPackageLoaded")
+
+## Manual imports
+importFrom("R.utils", "Arguments")
+
+if (packageVersion("R.utils") < "1.27.5") {
+  importFrom("R.utils", "getOption.default")
+}
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # EXPORTS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+export("R.devices")
+
 export("devEval")
 export("devIsOpen")
 export("devIsInteractive")
@@ -51,19 +65,22 @@ export("DevEvalFileProduct")
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # DECLARATIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# DevEvalFileProduct
+S3method("as.character", "DevEvalFileProduct")
+S3method("getDataURI", "DevEvalFileProduct")
+S3method("getExtension", "DevEvalFileProduct")
+S3method("getFilename", "DevEvalFileProduct")
+S3method("getFullname", "DevEvalFileProduct")
+S3method("getMime", "DevEvalFileProduct")
+S3method("getMimeType", "DevEvalFileProduct")
+S3method("getPath", "DevEvalFileProduct")
+S3method("getPathname", "DevEvalFileProduct")
+
+# DevEvalProduct
+S3method("$", "DevEvalProduct")
+S3method("[[", "DevEvalProduct")
 S3method("as.character", "DevEvalProduct")
 S3method("getFullname", "DevEvalProduct")
 S3method("getName", "DevEvalProduct")
 S3method("getTags", "DevEvalProduct")
 S3method("getType", "DevEvalProduct")
-S3method("[[", "DevEvalProduct")
-S3method("$", "DevEvalProduct")
-
-S3method("as.character", "DevEvalFileProduct")
-S3method("getPathname", "DevEvalFileProduct")
-S3method("getPath", "DevEvalFileProduct")
-S3method("getFilename", "DevEvalFileProduct")
-S3method("getMimeType", "DevEvalFileProduct")
-S3method("getMime", "DevEvalFileProduct")
-S3method("getFullname", "DevEvalFileProduct")
-S3method("getDataURI", "DevEvalFileProduct")
