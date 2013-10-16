@@ -2,6 +2,43 @@
 Package: R.devices
 ==================
 
+Version: 2.7.2 [2013-10-15]
+o Now the package vignettes are in vignettes/ and not in inst/doc/,
+  which will not be supported by R (>= 3.1.0).
+o ROBUSTNESS: Added package system tests for devSet().
+
+
+Version: 2.7.1 [2013-10-07]
+o CLEANUP: Now explicitly importing only what is needed in NAMESPACE.
+o Bumped up package dependencies.
+
+
+Version: 2.7.0 [2013-09-28]
+o GENERALIZATION: Vectorized devEval(), e.g. it is now possible to
+  do devEval(c("png", "pdf"), name="MyPlot", { plot(1:10) }).
+  Added arguments 'initially' and 'finally' to devEval().  Contrary
+  to 'expr' which is evalutated for each graphics type/device, these
+  are evaluated only once per call.  This makes it possible to avoid
+  repeating expensive computations.
+o GENERALIZATION: Vectorized devIsInteractive(), devIsOpen(),
+  devGetLabel(), devOff() and devDone().
+o Now devOff() and devDone() checks if device is opened before trying
+  to close it.  This avoids opening and closing of non-opened devices.
+o Updated the formal defaults of several devEval() arguments to be
+  NULL.  Instead, NULL for such arguments are translated to default
+  internally.  This was necessary in order to vectorize devEval().
+o Now the 'R.devices' Package object is also available when the
+  package is only loaded (but not attached).
+o CONSISTENCY: Now devList() returns an empty integer vector
+  (instead of NULL) if no open devices exists.
+o ROBUSTNESS: The device functions that are not vectorize do now
+  throw an informative error if passed a vector.
+o ROBUSTNESS: Added several more package system tests.
+o ROBUSTNESS: Now declaring all S3 method in NAMESPACE.
+o CLEANUP: Removed fallback attachments of 'R.utils' as these
+  are no longer needed with R.oo (>= 1.15.1).
+
+
 Version: 2.6.1 [2013-09-17]
 o ROBUSTNESS: Now getDataURI() throws an Exception is suggested
   package 'base64enc' is not installed.

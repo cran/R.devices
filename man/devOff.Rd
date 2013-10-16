@@ -10,10 +10,10 @@
 \alias{devOff}
 
 
-\title{Closes a device}
+\title{Closes zero or more devices}
 
 \description{
- Closes a device.
+ Closes zero or more devices.
 }
 
 \usage{
@@ -21,12 +21,12 @@ devOff(which=dev.cur(), ...)
 }
 
 \arguments{
-  \item{which}{An index (\code{\link[base]{numeric}}) or a label (\code{\link[base]{character}}).}
+  \item{which}{An index (\code{\link[base]{numeric}}) \code{\link[base]{vector}} or a label (\code{\link[base]{character}}) \code{\link[base]{vector}}.}
   \item{...}{Not used.}
 }
 
 \value{
-  Returns what \code{\link[grDevices:dev]{dev.off}()} returns.
+  Returns \code{\link[grDevices:dev]{dev.cur}()}.
 }
 
 \author{Henrik Bengtsson}
