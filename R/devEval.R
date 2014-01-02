@@ -1,5 +1,6 @@
 ###########################################################################/**
 # @RdocFunction devEval
+# @alias devDump
 #
 # @title "Opens a new graphics device, evaluate (graphing) code, and closes device"
 #
@@ -34,6 +35,8 @@
 #     or an error.}
 #   \item{force}{If @TRUE, and the image file already exists, then it is
 #     overwritten, otherwise not.}
+#   \item{which}{A @vector of devices to be copied.  Only applied if
+#     argument \code{expr} is missing.}
 # }
 #
 # \value{
@@ -70,7 +73,26 @@
 # @keyword device
 # @keyword utilities
 #*/###########################################################################
-devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL, envir=parent.frame(), name="Rplot", tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=NULL, filename=NULL, path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE)) {
+devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL, envir=parent.frame(), name=NULL, tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=NULL, filename=NULL, path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE), which=dev.cur()) {
+  # Make sure the currently open device, iff any, is still the active
+  # one when returning from this function.
+  devIdx <- NULL;
+  devListEntry <- devList();
+  devCur <- dev.cur();
+  on.exit({
+    if (devCur != 1L) devSet(devCur);
+
+    # Assert that no temporarily opened devices are left behind
+    devListExit <- setdiff(devList(), devIdx);
+    devListDiff <- setdiff(devListExit, devListEntry);
+    if (length(devListDiff) > 0L) {
+      types <- unlist(.devList());
+      types <- types[devListDiff];
+      throw("Detected new graphics devices that was opened but not closed while executing devEval(): ", paste(sprintf("%s (%s)", sQuote(devListDiff), types), collapse=", "));
+    }
+  }, add=TRUE)
+
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Vectorized version
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -85,25 +107,55 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
     type <- trim(type);
   }
 
+  # Argument 'expr':
+  hasExpr <- !missing(expr);
+
+
+  # Copy multiple input devices?
+  if (!hasExpr && length(which) > 1L) {
+    res <- list();
+    for (kk in seq_along(which)) {
+      idx <- which[kk];
+      devSet(idx);
+      res[[kk]] <- devEval(type=type, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force, which=idx);
+    } # for (idx ...)
+    names(res) <- names(which);
+    return(res);
+  } # if (length(which) > 1L)
+
+
+  # Multiple output types/devices?
   if (length(type) > 1L) {
     types <- type;
-    # Expression must be substitute():d to avoid the being evaluated here
-    expr <- substitute(expr);
 
     # Evaluate 'initially' only once
     eval(initially, envir=envir);
 
-    # Evaluate 'expr' once per graphics device
-    res <- lapply(types, FUN=function(type) {
-      devEval(type=type, expr=expr, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force);
-    });
+    if (hasExpr) {
+      # Expression must be substitute():d to avoid the being evaluated here
+      expr <- substitute(expr);
+
+      # Evaluate 'expr' once per graphics device
+      res <- lapply(types, FUN=function(type) {
+        devEval(type=type, expr=expr, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force);
+      });
+    } else {
+      # Evaluate 'expr' once per output device
+      res <- lapply(types, FUN=function(type) {
+        devEval(type=type, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force, which=which);
+      });
+    }
     names(res) <- types;
 
     # Evaluate 'finally' only once
     eval(finally, envir=envir);
 
     return(res);
-  }
+  } # if (length(type) > 1L)
+
+  # Sanity check
+  stopifnot(length(type) == 1L);
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Validate arguments
@@ -120,6 +172,14 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
   }
 
   # Argument 'name', 'tags' and 'sep':
+  # Default 'name' value
+  if (is.null(name)) {
+    if (hasExpr) {
+      name <- "Rplot"; # Backward compatible
+    } else {
+      name <- devGetLabel(which);
+    }
+  }
   fullname <- paste(c(name, tags), collapse=sep);
   fullname <- unlist(strsplit(fullname, split=sep, fixed=TRUE));
   fullname <- sub("^[\t\n\f\r ]*", "", fullname); # trim tags
@@ -177,7 +237,9 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
     }
     on.exit({
       # Make sure to close the device (the same that was opened)
-      if (!is.null(devIdx)) devDone(devIdx);
+      if (!is.null(devIdx)) {
+        devDone(devIdx);
+      }
 
       # Archive file?
       if (isPackageLoaded("R.archive")) {
@@ -220,11 +282,30 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
           }
         } # if (onIncomplete == ...)
       } # if (!done && isFile(...))
-    }, add=TRUE);
+    }, add=TRUE); # on.exit()
 
     # Evaluate 'initially', 'expr' and 'finally' (in that order)
     eval(initially, envir=envir);
-    eval(expr, envir=envir);
+    if (hasExpr) {
+      eval(expr, envir=envir);
+    } else {
+      # Copy the device specified by argument 'which'.
+      # Assert that device is interactive
+      devList <- devList(interactiveOnly=TRUE);
+      if (is.numeric(which)) {
+        ok <- is.element(which, devList);
+      } else {
+        ok <- is.element(which, names(devList));
+      }
+      if (!ok) {
+        types <- unlist(.devList());
+        type <- types[which];
+        throw(sprintf("Cannot copy a %s device - only interactive/screen devices are supported: %s", sQuote(type), sQuote(which)));
+      }
+
+      devSet(which);
+      dev.copy(which=devIdx);
+    }
     eval(finally, envir=envir);
 
     done <- TRUE;
@@ -247,8 +328,33 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
 } # devEval()
 
 
+devDump <- function(type=c("png", "pdf"), ..., path=NULL, envir=parent.frame(), field=NULL, which=devList(interactiveOnly=TRUE)) {
+  if (is.null(path)) {
+    # Timestamp, e.g. 2011-03-10_041359.032
+    timestamp <- format(Sys.time(), "%Y-%m-%d_%H%M%OS3", tz="");
+    path <- getOption("devEval/args/path", "figures/");
+    path <- file.path(path, timestamp);
+    path <- getOption("devDump/args/path", path);
+  }
+
+  devEval(type=type, ..., path=path, envir=envir, field=field, which=which);
+} # devDump()
+
+
 ############################################################################
 # HISTORY:
+# 2014-01-02
+# o Now the timestamp of the default path for devDump() is in the
+#   current time zone.
+# 2013-10-29
+# o Now devDump() by default outputs to figures/<timestamp>/
+# 2013-10-28
+# o ROBUSTNESS: Now devEval() detects and gives an informative error
+#   if one tries to copy a non-interactive/non-screen device.
+# o Added devDump() which is short for devEval(c("png", "pdf"), ...,
+#   which=devList()).
+# o If 'expr' is missing, devEval() copies the current active device
+#   and devEval(which=devList()) copies all open devices.
 # 2013-09-27
 # o BUG FIX: devEval() could generate "Error in devEval(type = "...",
 #   name = name, ..., field = field) : object 'done' not found".
