@@ -5,13 +5,16 @@ importFrom("R.methodsS3", "throw")
 importFrom("R.methodsS3", "setMethodS3")
 importFrom("R.oo", "setConstructorS3")
 importFrom("R.oo", "extend")
+importFrom("R.oo", "Package")
+importFrom("R.oo", "startupMessage")
+
+## Import Class:es
+importFrom("R.oo", "BasicObject")
+importFrom("R.utils", "Arguments")
 
 ## importFrom("R.oo", "[[.BasicObject")
 
 ## Importing functions
-importFrom("R.oo", "BasicObject")
-importFrom("R.oo", "Package")
-importFrom("R.oo", "startupMessage")
 importFrom("R.oo", "trim")
 importFrom("R.utils", "capitalize")
 importFrom("R.utils", "getOption") ## Multi-sources: R.utils, base
@@ -21,13 +24,7 @@ importFrom("R.utils", "inherits") ## Multi-sources: R.utils, base
 importFrom("R.utils", "isFile")
 importFrom("R.utils", "isPackageInstalled")
 importFrom("R.utils", "isPackageLoaded")
-
-## Manual imports
-importFrom("R.utils", "Arguments")
-
-if (packageVersion("R.utils") < "1.27.5") {
-  importFrom("R.utils", "getOption.default")
-}
+importFrom("base64enc", "dataURI")
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -35,6 +32,7 @@ if (packageVersion("R.utils") < "1.27.5") {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 export("R.devices")
 
+export("devDump")
 export("devEval")
 export("devIsOpen")
 export("devIsInteractive")
@@ -84,3 +82,4 @@ S3method("getFullname", "DevEvalProduct")
 S3method("getName", "DevEvalProduct")
 S3method("getTags", "DevEvalProduct")
 S3method("getType", "DevEvalProduct")
+

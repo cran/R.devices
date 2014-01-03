@@ -36,6 +36,7 @@ devIsOpen <- function(which=dev.cur(), ...) {
 
   devList <- .devList();
   devs <- devList[which];
+
   labels <- names(devs);
   isOpen <- sapply(devs, FUN=function(dev) !is.null(dev) && nzchar(dev));
   isOpen <- isOpen & !is.na(labels);
@@ -58,6 +59,8 @@ devIsOpen <- function(which=dev.cur(), ...) {
 # @synopsis
 #
 # \arguments{
+#   \item{interactiveOnly}{If @TRUE, only open interactive/screen devices
+#     are returned.}
 #   \item{dropNull}{If @TRUE, the "null" device (device index 1) is
 #     not returned.}
 #   \item{...}{Not used.}
@@ -76,7 +79,7 @@ devIsOpen <- function(which=dev.cur(), ...) {
 # @keyword device
 # @keyword utilities
 #*/###########################################################################
-devList <- function(dropNull=TRUE, ...) {
+devList <- function(interactiveOnly=FALSE, dropNull=TRUE, ...) {
   devList <- .devList();
 
   # Return only opened devices
@@ -87,6 +90,13 @@ devList <- function(dropNull=TRUE, ...) {
   # Exclude the "null" device?
   if (dropNull) {
     idxs <- idxs[-1L];
+  }
+
+  # Include only interactive devices?
+  if (interactiveOnly) {
+    types <- unlist(devList[idxs]);
+    keep <- devIsInteractive(types);
+    idxs <- idxs[keep];
   }
 
   idxs;
@@ -126,10 +136,17 @@ devList <- function(dropNull=TRUE, ...) {
 #*/###########################################################################
 devGetLabel <- function(which=dev.cur(), ...) {
   devList <- devList(dropNull=FALSE);
-  devs <- devList[which];
+  if (is.numeric(which)) {
+    devs <- devList[match(which, devList)];
+  } else {
+    devs <- devList[which];
+  }
   labels <- names(devs);
-  if (any(is.na(labels))) {
-    throw("No such device: ", paste(which[is.na(labels)], collapse=", "));
+  unknown <- which[is.na(labels)];
+  if (length(unknown) > 0L) {
+    known <- names(devList(dropNull=FALSE));
+    if (length(known) == 0L) known <- "<none>";
+    throw(sprintf("Cannot get device label. No such device: %s (known devices: %s)", paste(sQuote(unknown), collapse=", "), paste(sQuote(known), collapse=", ")));
   }
   labels;
 } # devGetLabel()
@@ -172,11 +189,19 @@ devSetLabel <- function(which=dev.cur(), label, ...) {
     throw("Argument 'which' must be a scalar: ", paste(which, collapse=", "));
   }
 
-  if (is.character(which))
-    which <- .devIndexOf(which);
   devList <- .devList();
-  if (devList[[which]] == "")
-    throw("No such device: ", which);
+  if (is.numeric(which)) {
+    idx <- which;
+  } else {
+    idx <- .devIndexOf(which);
+  }
+
+  # Unknown devices?
+  if (devList[[idx]] == "") {
+    known <- names(devList(dropNull=FALSE));
+    if (length(known) == 0L) known <- "<none>";
+    throw(sprintf("Cannot set device label. No such device: %s (known devices: %s)", paste(sQuote(which), collapse=", "), paste(sQuote(known), collapse=", ")));
+  }
 
   # Update the label
   if (is.null(label))
@@ -246,10 +271,9 @@ devSet <- function(which=dev.next(), ...) {
     throw("Argument 'which' must be a scalar: ", paste(which, collapse=", "));
   }
 
-  if (which < 2L) {
-    throw("Cannot set device: ", which);
+  if (which < 2L || which > 63L) {
+    throw("Cannot set device: Argument 'which' is out of range [2,63]: ", which);
   }
-
 
   if (devIsOpen(which)) {
     # Active already existing device
@@ -264,29 +288,27 @@ devSet <- function(which=dev.next(), ...) {
     toBeOpened <- setdiff(2:(which-1L), dev.list());
   }
 
-  toBeClosed <- list();
   len <- length(toBeOpened);
   if (len > 0L) {
-    for (idx in toBeOpened) {
-      # Create a dummy postscript device (which is non-visible)
-      pathname <- tempfile();
-      toBeClosed[[idx]] <- pathname;
-      postscript(file=pathname);
+    tempfiles <- sapply(toBeOpened, FUN=function(...) tempfile());
+
+    # Make sure to close all temporary devices when exiting function
+    on.exit({
+      for (kk in seq_along(toBeOpened)) {
+        dev.set(toBeOpened[kk]);
+        dev.off();
+        if (file.exists(tempfiles[kk])) file.remove(tempfiles[kk]);
+      }
+    }, add=TRUE);
+
+    # Create a dummy temporary postscript device (which is non-visible)
+    for (kk in seq_along(toBeOpened)) {
+      postscript(file=tempfiles[kk]);
     }
   }
 
   # Open the device
   res <- do.call("devNew", args=args);
-
-  # Close temporarily opened devices
-  for (kk in seq_along(toBeClosed)) {
-    pathname <- toBeClosed[[kk]];
-    if (!is.null(pathname)) {
-      dev.set(kk);
-      dev.off();
-      file.remove(pathname);
-    }
-  }
 
   invisible(res);
 } # devSet()
@@ -411,7 +433,7 @@ devDone <- function(which=dev.cur(), ...) {
     type <- tolower(names(which));
     type <- gsub(":.*", "", type);
 
-    isOnScreen <- (type %in% deviceIsInteractive());
+    isOnScreen <- (is.element(type, deviceIsInteractive()));
     if (!isOnScreen)
       devOff(which);
   }
@@ -483,10 +505,11 @@ devIsInteractive <- function(types, ...) {
 
   # Device type aliases?
   type <- .devTypeName(type);
+  type <- tolower(type);
 
   # A known interactive device?
   knownInteractive <- grDevices::deviceIsInteractive();
-  res <- is.element(tolower(type), tolower(knownInteractive));
+  res <- is.element(type, tolower(knownInteractive));
 
   names(res) <- type0;
 
@@ -583,6 +606,18 @@ devIsInteractive <- function(types, ...) {
 
 ############################################################################
 # HISTORY:
+# 2013-10-29
+# o ROBUSTESS/BUG FIX: devSet(which) where 'which' is a very large number
+#   could leave lots of stray temporary devices open when error "too many
+#   open devices" occurred.  Now all temporary devices are guaranteed to
+#   be closed also when there is an error.
+# 2013-10-28
+# o BUG FIX: dev(Get|Set)Label(which) would not handle the case when
+#   the device specified by an numeric 'which' and there is a
+#   gap in the device list.
+# o Added argument 'interactiveOnly' to devList().
+# o ROBUSTNESS: Now devSet() is guaranteed to close all temporary
+#   devices it opens.
 # 2013-10-15
 # o BUG FIX: devSet(key), where 'key' is a non-integer object (which is
 #   coerced to a device label via digest()), stopped working due to a too
