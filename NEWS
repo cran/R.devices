@@ -2,6 +2,42 @@
 Package: R.devices
 ==================
 
+Version: 2.9.2 [2014-05-15]
+o Bumped up the package dependencies.
+
+
+Version: 2.9.1 [2014-05-01]
+o Added withPar() for plotting with temporarily set graphical parameters.
+
+
+Version: 2.9.0 [2014-04-28]
+o Added toDefault() for plotting to the default device analogously to
+  how the other toNnn() device functions works.  Likewise, added toX11(),
+  toWindows(), toQuartz(), toCairoWin(), toCairoX11(), and toJavaGD()
+  for plotting to interactive/screen devices.
+o Now it's possible to use devEval() to open a new or activate an
+  existing interactive/screen device.
+o Added support for (hidden) argument 'which' to devNew(), such that
+  devNew(type, which=which) avoids opening a new device iff an existing
+  device of the same device type and index/label already is opened.
+  For instance, calling devNew("X11", which="foo") will open an X11
+  device and label it 'foo'.  Subsequent calls will set the focus that
+  same device.
+o BUG FIX: Now devEval("windows", { plot(1:10) }) no longer gives
+  "Error: Detected new graphics devices that was opened but not
+  closed while executing devEval(): '2' (windows)".
+o Bumped up package dependencies.
+
+
+Version: 2.8.4 [2014-01-11]
+o Added asDataURI() for converting an image file to an
+  Base64-encoded data URI character string.
+
+
+Version: 2.8.3 [2014-01-10]
+o Added toFavicon() for outputting figures as HTML favicons.
+
+
 Version: 2.8.2 [2014-01-02]
 o Now the timestamp of the default path for devDump() is in the
   current time zone.
@@ -73,7 +109,7 @@ o ROBUSTNESS: The device functions that are not vectorize do now
   throw an informative error if passed a vector.
 o ROBUSTNESS: Added several more package system tests.
 o ROBUSTNESS: Now declaring all S3 method in NAMESPACE.
-o CLEANUP: Removed fallback attachments of 'R.utils' as these
+o CLEANUP: Removed fall back attachments of 'R.utils' as these
   are no longer needed with R.oo (>= 1.15.1).
 
 

@@ -10,7 +10,7 @@
 t0 <- Sys.time()
 library("R.devices");
 R.rsp <- R.oo::Package("R.rsp")
-evalWithEcho <- R.rsp::evalWithEcho
+withCapture <- R.utils::withCapture
 hpaste <- R.utils::hpaste
 
 devOptions("png", width=840);
@@ -28,16 +28,16 @@ toPDF("MyGaussianDensity", aspectRatio=0.6, {
    curve(dnorm, from=-5, to=+5);
   })
 devOptions("png", reset=TRUE)
-evalWithEcho({
+withCapture({
 devOptions("png")
 })
-evalWithEcho({
+withCapture({
 devOptions("png", width=1024, bg="lightblue")
 })
-evalWithEcho({
+withCapture({
 devOptions("png", reset=TRUE)
 })
-evalWithEcho({
+withCapture({
 devOptions()[,c("width", "height", "bg", "fg", "pointsize")]
 })
 toLatex(sessionInfo())

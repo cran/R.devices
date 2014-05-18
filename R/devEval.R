@@ -74,25 +74,6 @@
 # @keyword utilities
 #*/###########################################################################
 devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL, envir=parent.frame(), name=NULL, tags=NULL, sep=getOption("devEval/args/sep", ","), ..., ext=NULL, filename=NULL, path=getOption("devEval/args/path", "figures/"), field=getOption("devEval/args/field", NULL), onIncomplete=c("remove", "rename", "keep"), force=getOption("devEval/args/force", TRUE), which=dev.cur()) {
-  # Make sure the currently open device, iff any, is still the active
-  # one when returning from this function.
-  devIdx <- NULL;
-  devListEntry <- devList();
-  devCur <- dev.cur();
-  on.exit({
-    if (devCur != 1L) devSet(devCur);
-
-    # Assert that no temporarily opened devices are left behind
-    devListExit <- setdiff(devList(), devIdx);
-    devListDiff <- setdiff(devListExit, devListEntry);
-    if (length(devListDiff) > 0L) {
-      types <- unlist(.devList());
-      types <- types[devListDiff];
-      throw("Detected new graphics devices that was opened but not closed while executing devEval(): ", paste(sprintf("%s (%s)", sQuote(devListDiff), types), collapse=", "));
-    }
-  }, add=TRUE)
-
-
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Vectorized version
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -110,21 +91,44 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
   # Argument 'expr':
   hasExpr <- !missing(expr);
 
+  ## SPECIAL CASE: Handle calls like toNnn({ expr }) where the actual plot
+  ## expression is actually passed via the first argument which is 'name'
+  ## and not via 'expr', e.g. toX11({ plot(1:3) }).
+  if (!hasExpr) {
+    # Was the expression passed implicitly via 'name' instead?
+    # In order to infer this, we have to inspect the parent frame:
+    nameClass <- eval(expression(class(substitute(name))), envir=parent.frame());
+    if (is.element(nameClass, c("call", "{", "("))) {
+      # This avoid the plot expression to be evaluated here.
+      delayedAssign("expr", name);
+      hasExpr <- TRUE;
+      nameOrg <- NULL;
+    } else {
+      nameOrg <- name;
+    }
+  } else {
+    nameOrg <- name;
+  }
 
-  # Copy multiple input devices?
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # (a) No plot code expression?  Then copy multiple input devices...
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   if (!hasExpr && length(which) > 1L) {
     res <- list();
     for (kk in seq_along(which)) {
       idx <- which[kk];
       devSet(idx);
-      res[[kk]] <- devEval(type=type, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force, which=idx);
+      res[[kk]] <- devEval(type=type, initially=NULL, finally=NULL, envir=envir, name=nameOrg, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force, which=idx);
     } # for (idx ...)
     names(res) <- names(which);
     return(res);
   } # if (length(which) > 1L)
 
 
-  # Multiple output types/devices?
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # (b) Plot code expression, but with multiple output types/devices?
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   if (length(type) > 1L) {
     types <- type;
 
@@ -137,12 +141,12 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
 
       # Evaluate 'expr' once per graphics device
       res <- lapply(types, FUN=function(type) {
-        devEval(type=type, expr=expr, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force);
+        devEval(type=type, expr=expr, initially=NULL, finally=NULL, envir=envir, name=nameOrg, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force);
       });
     } else {
       # Evaluate 'expr' once per output device
       res <- lapply(types, FUN=function(type) {
-        devEval(type=type, initially=NULL, finally=NULL, envir=envir, name=name, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force, which=which);
+        devEval(type=type, initially=NULL, finally=NULL, envir=envir, name=nameOrg, tags=tags, sep=sep, ..., ext=ext, filename=filename, path=path, field=field, onIncomplete=onIncomplete, force=force, which=which);
       });
     }
     names(res) <- types;
@@ -153,6 +157,10 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
     return(res);
   } # if (length(type) > 1L)
 
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # (c) Plot code expression and a single output type/device
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Sanity check
   stopifnot(length(type) == 1L);
 
@@ -171,40 +179,45 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
     type <- .devTypeName(type);
   }
 
+  # An interactive/non-file device?
+  isInteractive <- devIsInteractive(type);
+
   # Argument 'name', 'tags' and 'sep':
   # Default 'name' value
-  if (is.null(name)) {
+  if (is.null(nameOrg) && !isInteractive) {
     if (hasExpr) {
-      name <- "Rplot"; # Backward compatible
+      nameOrg <- "Rplot"; # Backward compatible
     } else {
-      name <- devGetLabel(which);
+      nameOrg <- devGetLabel(which);
     }
   }
-  fullname <- paste(c(name, tags), collapse=sep);
+
+  # Construct the full name
+  fullname <- paste(c(nameOrg, tags), collapse=sep);
   fullname <- unlist(strsplit(fullname, split=sep, fixed=TRUE));
   fullname <- sub("^[\t\n\f\r ]*", "", fullname); # trim tags
   fullname <- sub("[\t\n\f\r ]*$", "", fullname); #
   fullname <- fullname[nchar(fullname) > 0L];     # drop empty tags
   fullname <- paste(fullname, collapse=sep);
-  parts <- unlist(strsplit(fullname, split=sep, fixed=TRUE));
-  name <- parts[1L];
-  tags <- parts[-1L];
 
-  # Argument 'ext':
-  if (is.null(ext)) {
-    if (is.character(type)) {
-      ext <- type;
-    } else {
-      ext <- substitute(type);
-      ext <- as.character(ext);
+  if (!isInteractive) {
+    # Argument 'ext':
+    if (is.null(ext)) {
+      if (is.character(type)) {
+        ext <- type;
+      } else {
+        ext <- substitute(type);
+        ext <- as.character(ext);
+      }
     }
+
+    # Argument 'filename' & 'path':
+    if (is.null(filename)) {
+      filename <- sprintf("%s.%s", fullname, ext);
+    }
+    pathname <- Arguments$getWritablePathname(filename, path=path);
   }
 
-  # Argument 'filename' & 'path':
-  if (is.null(filename)) {
-    filename <- sprintf("%s.%s", fullname, ext);
-  }
-  pathname <- Arguments$getWritablePathname(filename, path=path);
 
   # Argument 'field':
   if (!is.null(field)) {
@@ -218,71 +231,92 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
   force <- Arguments$getLogical(force);
 
 
-  # An interactive/non-file device?
-  isInteractive <- devIsInteractive(type);
+
+  devIdx <- NULL;
+  if (!isInteractive) {
+    # Make sure the currently open device, iff any, is still the active
+    # one when returning from this function.
+    devListEntry <- devList();
+    devCur <- dev.cur();
+    on.exit({
+      if (devCur != 1L) devSet(devCur);
+
+      # Assert that no temporarily opened devices are left behind,
+      devListExit <- setdiff(devList(), devIdx);
+      devListDiff <- setdiff(devListExit, devListEntry);
+      if (length(devListDiff) > 0L) {
+        types <- unlist(.devList());
+        types <- types[devListDiff];
+        throw("Detected new graphics devices that was opened but not closed while executing devEval(): ", paste(sprintf("%s (%s)", sQuote(devListDiff), types), collapse=", "));
+      }
+    }, add=TRUE)
+  }
 
   # Result object
   if (isInteractive) {
-    res <- DevEvalProduct(name=name, tags=tags, type=type);
+    res <- DevEvalProduct(fullname, type=type);
   } else {
     res <- DevEvalFileProduct(pathname, type=type);
   }
 
   done <- FALSE;
-  if (force || !isFile(pathname)) {
+  if (force || isInteractive || !isFile(pathname)) {
+    # Open device
     if (isInteractive) {
-      devIdx <- devNew(type, ...);
+      devIdx <- devNew(type, which=fullname, ...);
     } else {
       devIdx <- devNew(type, pathname, ...);
-    }
-    on.exit({
-      # Make sure to close the device (the same that was opened)
-      if (!is.null(devIdx)) {
-        devDone(devIdx);
-      }
 
-      # Archive file?
-      if (isPackageLoaded("R.archive")) {
-        # To please R CMD check
-        getArchiveOption <- archiveFile <- NULL;
-        if (getArchiveOption("devEval", FALSE)) archiveFile(pathname);
-      }
+      on.exit({
+        # Make sure to close the device (the same that was opened),
+        # unless it's an interactive device.
+        if (!is.null(devIdx)) {
+          devDone(devIdx);
+        }
 
-      if (!done && isFile(pathname)) {
-        if (onIncomplete == "remove") {
-          # Remove incomplete image file
-          file.remove(pathname);
-        } else if (onIncomplete == "rename") {
-          # Rename incomplete image file to denote that
-          # it is incomplete.
-          pattern <- "^(.*)[.]([^.]*)$";
-          if (regexpr(pattern, pathname) != -1L) {
-            fullname <- gsub(pattern, "\\1", pathname);
-            ext <- gsub(pattern, "\\2", pathname);
-            fmtstr <- sprintf("%s,INCOMPLETE_%%03d.%s", fullname, ext);
-          } else {
-            fmtstr <- sprintf("%s,INCOMPLETE_%%03d", pathname);
-          }
+        # Archive file?
+        if (isPackageLoaded("R.archive")) {
+          # To please R CMD check
+          getArchiveOption <- archiveFile <- NULL;
+          if (getArchiveOption("devEval", FALSE)) archiveFile(pathname);
+        }
 
-          # Try to rename
-          for (kk in seq_len(999L)) {
-            pathnameN <- sprintf(fmtstr, kk);
-            if (isFile(pathnameN)) next;
-            resT <- file.rename(pathname, pathnameN);
-            # Done?
-            if (resT && isFile(pathnameN)) {
-              pathname <- pathnameN;
-              break;
+        if (!done && isFile(pathname)) {
+          if (onIncomplete == "remove") {
+            # Remove incomplete image file
+            file.remove(pathname);
+          } else if (onIncomplete == "rename") {
+            # Rename incomplete image file to denote that
+            # it is incomplete.
+            pattern <- "^(.*)[.]([^.]*)$";
+            if (regexpr(pattern, pathname) != -1L) {
+              fullname <- gsub(pattern, "\\1", pathname);
+              ext <- gsub(pattern, "\\2", pathname);
+              fmtstr <- sprintf("%s,INCOMPLETE_%%03d.%s", fullname, ext);
+            } else {
+              fmtstr <- sprintf("%s,INCOMPLETE_%%03d", pathname);
             }
-          } # for (kk ...)
 
-          # Failed to rename?
-          if (isFile(pathname)) {
-            throw("Failed to rename incomplete image file: ", pathname);
-          }
-        } # if (onIncomplete == ...)
-      } # if (!done && isFile(...))
-    }, add=TRUE); # on.exit()
+            # Try to rename
+            for (kk in seq_len(999L)) {
+              pathnameN <- sprintf(fmtstr, kk);
+              if (isFile(pathnameN)) next;
+              resT <- file.rename(pathname, pathnameN);
+              # Done?
+              if (resT && isFile(pathnameN)) {
+                pathname <- pathnameN;
+                break;
+              }
+            } # for (kk ...)
+
+            # Failed to rename?
+            if (isFile(pathname)) {
+              throw("Failed to rename incomplete image file: ", pathname);
+            }
+          } # if (onIncomplete == ...)
+        } # if (!done && isFile(...))
+      }, add=TRUE); # on.exit()
+    } # if (isInteractive)
 
     # Evaluate 'initially', 'expr' and 'finally' (in that order)
     eval(initially, envir=envir);
@@ -320,7 +354,7 @@ devEval <- function(type=getOption("device"), expr, initially=NULL, finally=NULL
   }
 
   # Subset?
-  if (!is.null(field)) {
+  if (!isInteractive && !is.null(field)) {
     res <- res[[field]];
   }
 
@@ -343,6 +377,15 @@ devDump <- function(type=c("png", "pdf"), ..., path=NULL, envir=parent.frame(), 
 
 ############################################################################
 # HISTORY:
+# 2014-04-28
+# o By code inspection, it's now possible to do toX11({ plot(1:2) }), where
+#   argument 'name' is not given and the plot expression is the first
+#   argument (which will be assigned to 'name').  Internally, this is
+#   handled by devEval(), instead of each single toNnn() function.
+# 2014-04-27
+# o BUG FIX: Now devEval("windows", { plot(1:10) }) no longer gives
+#   "Error: Detected new graphics devices that was opened but not
+#   closed while executing devEval(): '2' (windows)".
 # 2014-01-02
 # o Now the timestamp of the default path for devDump() is in the
 #   current time zone.

@@ -13,10 +13,22 @@
 \alias{toEMF}
 \alias{toEPS}
 \alias{toPDF}
+%% \alias{toCairoPNG}
 \alias{toPNG}
 \alias{toSVG}
 \alias{toTIFF}
 \alias{toWMF}
+\alias{toFavicon}
+\alias{asDataURI}
+
+% Interactive/screen devices
+\alias{toDefault}
+\alias{toQuartz}
+\alias{toWindows}
+\alias{toX11}
+\alias{toCairoWin}
+\alias{toCairoX11}
+%% \alias{toJavaGD}
 
 \title{Methods for creating image files of a specific format}
 
@@ -32,6 +44,21 @@
   toSVG(name, ..., field=getOption("devEval/args/field", "fullname"))
   toTIFF(name, ..., field=getOption("devEval/args/field", "fullname"))
   toWMF(name, ..., ext="wmf", field=getOption("devEval/args/field", "fullname"))
+  %% toCairoPNG(name, ..., field=getOption("devEval/args/field", "fullname"))
+
+  toFavicon(..., name="favicon", type="png", width=32L, height=width,
+                 par=list(mar=c(0,0,0,0), bg="transparent"))
+
+  % Interactive/screen devices
+  toDefault(name, ...)
+  toQuartz(name, ...)
+  toX11(name, ...)
+  toWindows(name, ...)
+
+  % Interactive/screen devices from other packages
+  toCairoWin(name, ...)
+  toCairoX11(name, ...)
+  %% toJavaGD(name, ...)
 }
 
 \arguments{
@@ -40,6 +67,7 @@
      \code{tags} and \code{aspectRatio}.}
   \item{ext}{A \code{\link[base]{character}} string specifying the filename extension.}
   \item{field}{Passed to \code{\link{devEval}}().}
+  \item{width, height, type, par}{Passed to \code{\link{devEval}}().}
 }
 
 \value{
