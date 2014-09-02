@@ -9,6 +9,7 @@
 
 t0 <- Sys.time()
 library("R.devices");
+options("devEval/args/field"="fullname") # Better for LaTeX
 R.rsp <- R.oo::Package("R.rsp")
 withCapture <- R.utils::withCapture
 hpaste <- R.utils::hpaste
