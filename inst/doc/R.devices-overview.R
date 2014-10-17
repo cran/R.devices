@@ -1,6 +1,6 @@
 ###########################################################################
 ## This 'tangle' R script was created from an RSP document.
-## RSP source document: 'R.devices-overview.tex.rsp'
+## RSP source document: './R.devices-overview.tex.rsp'
 ## Metadata 'title': 'R.devices overview'
 ## Metadata 'author': 'Henrik Bengtsson'
 ## Metadata 'keywords': 'devices, graphics, plots, figures'
@@ -9,12 +9,12 @@
 
 t0 <- Sys.time()
 library("R.devices");
-options("devEval/args/field"="fullname") # Better for LaTeX
 R.rsp <- R.oo::Package("R.rsp")
 withCapture <- R.utils::withCapture
 hpaste <- R.utils::hpaste
 
 devOptions("png", width=840);
+devOptions("png", field="fullname") # Better for LaTeX
 options(width=85);
 options(digits=3);
 options(str=strOptions(strict.width="cut"));

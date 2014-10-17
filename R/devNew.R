@@ -257,11 +257,16 @@ devNew <- function(type=getOption("device"), ..., scale=1, aspectRatio=1, par=NU
     if (is.null(label)) label <- names(devIdx);
   }
 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Set the label of the recently opened device
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   devSetLabel(which=devIdx, label=label);
 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Default and user-specific parameters
-  parT <- getOption("devNew/args/par", list());
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  parT <- getDevOption(type=type, name="par", old="devNew/args/par")
+  # Append
   parT <- c(parT, par);
   if (length(parT) > 0L) {
     par(parT);

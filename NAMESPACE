@@ -18,6 +18,8 @@ importFrom("R.utils", "Arguments")
 importFrom("R.oo", "trim")
 importFrom("R.utils", "capitalize")
 importFrom("R.utils", "getOption") ## Multi-sources: R.utils, base
+importFrom("R.utils", "setOption")
+importFrom("R.utils", "getAbsolutePath")
 importFrom("R.utils", "getRelativePath")
 importFrom("R.utils", "hpaste")
 importFrom("R.utils", "inherits") ## Multi-sources: R.utils, base
@@ -25,6 +27,9 @@ importFrom("R.utils", "isFile")
 importFrom("R.utils", "isPackageInstalled")
 importFrom("R.utils", "isPackageLoaded")
 importFrom("base64enc", "dataURI")
+
+# Import from grDevices
+import("grDevices")
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -46,7 +51,9 @@ export("devOff")
 export("devDone")
 export("devNew")
 export("devOptions")
+export("getDevOption")
 export("eps")
+export("favicon")
 export("jpeg2")
 export("png2")
 
@@ -88,6 +95,7 @@ S3method("getMime", "DevEvalFileProduct")
 S3method("getMimeType", "DevEvalFileProduct")
 S3method("getPath", "DevEvalFileProduct")
 S3method("getPathname", "DevEvalFileProduct")
+S3method("view", "DevEvalFileProduct")
 
 # DevEvalProduct
 S3method("$", "DevEvalProduct")
@@ -97,3 +105,5 @@ S3method("getFullname", "DevEvalProduct")
 S3method("getName", "DevEvalProduct")
 S3method("getTags", "DevEvalProduct")
 S3method("getType", "DevEvalProduct")
+S3method("view", "DevEvalProduct")
+S3method("!", "DevEvalProduct")

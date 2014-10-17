@@ -2,6 +2,76 @@
 Package: R.devices
 ==================
 
+Version: 2.12.0 [2014-09-17]
+o DEVICES: Added support for all Cairo* devices of the Cairo package.
+o DEVICES: Added favicon() device, which is a wrapper for png() with
+  bells and whistles.  It has its own device options.  Updated
+  toFavicon() to use default argument field="htmlscript", which
+  generates an HTML script that dynamically sets the favicon.
+o Several functions now supports specifying device type names by
+  regular expressions, e.g. devOptions("cairo_.*") and
+  devEval("cairo_.*", name="foo", { plot(1:10) }).  The latter will
+  output one image file for each available cairo_.* device.
+o Added support for "global" device options to fall back on if no set
+  for the device type queried, e.g. devOptions("*", pointsize=14).
+o Now arguments 'sep', 'path', 'field' and 'force' for devEval() and
+  the various toNnn() functions now utilizes getDevOption(), which
+  is still backward compatibilty with the old style R options.
+o Now devIsInteractive() without arguments returns all known
+  interactive devices.
+o ROBUSTNESS: Now package does a better job of checking whether a
+  particular device is supported on the current system, cf.
+  capabilities() and Cairo::Cairo.capabilities().
+o CLEANUP: Dropped argument 'field' for toNnn(), because the default
+  is now NULL which corresponds to returning a DevEvalProduct object.
+  In turn, this object has the pathname as it's value, which was the
+  previous default 'field' value.  Also, as.character() on this object
+  returns the (relative) pathname.
+o CLEANUP: All old-style R options (e.g. 'devEval/args/field') have
+  been deprecated.  They will still work for a while but it is
+  recommended to set them as devOptions("*", field=...) instead.
+
+
+Version: 2.11.5 [2014-09-30]
+o Added view() and !() to DevEvalProduct.
+o BUG FIX: devDone() would close some devices despite them being
+  on screen/interactive devices, e.g. an x11 device.
+o BUG FIX: devNew(x11) on Unix/Linux where the default 'width' or
+  'height' failed to be inferred would throw an error reporting
+  on "cannot coerce type 'closure' to vector of type 'character'".
+
+
+Version: 2.11.4 [2014-09-16]
+o ROBUSTNESS: Now withPar() also resets all the graphical parameters
+  available upon entry even if no explicit ones were specified.  This
+  covers the case when 'expr' changes the parameters, e.g.
+  withPar({ par(cex=2L); plot(1:10) }).
+o BUG FIX: Now getPathname(..., relative=FALSE) returns the absolute
+  pathname.
+o BUG FIX: devOptions() returned the incorrect options for device
+  types "eps", "jpg2" and "png2" if package was not attached.
+
+
+Version: 2.11.3 [2014-09-12]
+o Added getDevOption().
+o BUG FIX: On Windows, devOptions() assumed that the 'grDevices'
+  package was attached.
+o BUG FIX: devOptions(type, name=NULL) did not assign the option NULL.
+o CLEANUP: devDump() fell back on option 'devDump/args/path', but
+  that would never happen.  Dropping that option.
+
+
+Version: 2.11.2 [2014-09-11]
+o ROBUSTNESS: Added explicit package tests for devOptions().
+o BUG FIX: devEval("cairo_pdf", ...) for generate an image file with
+  a *.cairo_pdf filename extension. Now devEval(..., ext=NULL) does a
+  better job of inferring the default extension from the device type.
+
+
+Version: 2.11.1 [2014-09-02]
+o Added getData() to DevEvalFileProduct.
+
+
 Version: 2.11.0 [2014-08-29]
 o Added support for devEval() to try multiple device types one-by-one
   until success, e.g. devEval("png|jpg|bmp", ...).
@@ -227,7 +297,7 @@ o Bumped up package dependencies.
 Version: 2.1.6 [2013-02-13]
 o Changed default argument 'field' for devEval() from NULL to
   getOption("devEval/args/field", NULL).
-o Changed default argument 'field' for toNNN() from "fullname"
+o Changed default argument 'field' for toNnn() from "fullname"
   to getOption("devEval/args/field", "fullname").
 
 

@@ -77,6 +77,12 @@ setMethodS3("as.character", "DevEvalProduct", function(x, ...) {
 }, private=TRUE)
 
 
+setMethodS3("view", "DevEvalProduct", function(object, ...) {})
+
+setMethodS3("!", "DevEvalProduct", function(x) {
+  view(x)
+}, appendVarArgs=FALSE)
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # BEGIN: PATCH until `[[.BasicObject` finds methods in namespaces
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -225,6 +231,7 @@ setMethodS3("getType", "DevEvalProduct", function(this, ...) {
 #   \item \code{name}: the part of the fullname before the first comma, e.g. 'foo'
 #   \item \code{tags}: the part of the fullname after the first comma, e.g. 'a,b'
 #   \item \code{dataURI}: the Base64-encoded Data URI representation of the image, e.g. 'data:image/png;base64,iVBORw0KGgoAAAA...'.  This can be used to \emph{include} ("inlining") image files in for instance self-contained HTML and Markdown documents.
+#   \item \code{data}: the character content of the image file.  This can be used to \emph{include} ("inlining") WebGL HTML-based image files in for instance self-contained HTML and Markdown documents.
 #  }
 # }
 #
@@ -311,6 +318,8 @@ setMethodS3("getPathname", "DevEvalFileProduct", function(this, relative=TRUE, .
   pathname <- as.character(unclass(this), ...);
   if (relative) {
     pathname <- getRelativePath(pathname);
+  } else {
+    pathname <- getAbsolutePath(pathname);
   }
   pathname;
 })
@@ -327,6 +336,27 @@ setMethodS3("getExtension", "DevEvalFileProduct", function(this, ...) {
   filename <- getFilename(this, ...);
   gsub(".*[.]([^.]*)$", "\\1", filename);
 }, private=TRUE)
+
+setMethodS3("view", "DevEvalFileProduct", function(object, ...) {
+  pathname <- object
+
+  # WORKAROUND: browseURL('foo/bar.html', browser=NULL), which in turn
+  # calls shell.exec('foo/bar.html'), does not work on Windows, because
+  # the OS expects backslashes.  [Should shell.exec() convert to
+  # backslashes?]  By temporarily setting the working directory to that
+  # of the file, this works around this issue.
+  # Borrowed from R.rsp. /HB 2014-09-19
+  if (isFile(pathname)) {
+    path <- dirname(pathname);
+    pathname <- basename(pathname);
+    opwd <- getwd();
+    on.exit(setwd(opwd));
+    setwd(path);
+  }
+  browseURL(pathname, ...)
+
+  invisible(object)
+})
 
 
 
@@ -387,8 +417,10 @@ setMethodS3("getMime", "DevEvalFileProduct", function(this, ...) {
 #########################################################################/**
 # @RdocMethod getDataURI
 # @alias getDataURI
+# @aliasmethod getData
+# @alias getData
 #
-# @title "Gets a Base64-encoded data URI"
+# @title "Gets content as a Base64-encoded data URI"
 #
 # \description{
 #  @get "title".
@@ -415,35 +447,30 @@ setMethodS3("getDataURI", "DevEvalFileProduct", function(this, mime=getMimeType(
   dataURI(file=getPathname(this), mime=mime, encoding="base64");
 })
 
+setMethodS3("getData", "DevEvalFileProduct", function(this, mode=c("character", "raw"), ...) {
+  # Argument 'mode':
+  mode <- match.arg(mode);
 
-
-## setMethodS3("defaultField", "DevEvalProduct", function(this, default=getOption("devEval/args/field", "pathname"), ...) {
-##   res <- attr(this, "defaultField", exact=TRUE);
-##   if (is.null(res)) res <- default;
-##   res;
-## }, private=TRUE)
-##
-## setMethodS3("setDefault", "DevEvalProduct", function(x, value, ...) {
-##   if (!is.null(value)) {
-##     value <- Arguments$getCharacter(value);
-##   }
-##   attr(x, "defaultField") <- value;
-##   invisible(x);
-## }, private=TRUE)
-##
-## setMethodS3("getDefault", "DevEvalProduct", function(this, ...) {
-##   field <- defaultField(this, ...);
-##   if (is.null(field)) return(this);
-##   # AD HOC: Workaround for internal protection of `[[.BasicObject`.
-##   attr(this, "disableGetMethods") <- NULL;
-##   this[[field]];
-## }, private=TRUE)
-
-
+  pathname <- this;
+  size <- file.info(pathname)$size;
+  if (mode == "character") {
+    res <- readChar(con=pathname, nchars=size);
+  } else if (mode == "raw") {
+    res <- readBin(con=pathname, what=raw(), n=size);
+  }
+  res
+}) # getData()
 
 
 ############################################################################
 # HISTORY:
+# 2014-09-17
+# o Added view() and !() to DevEvalProduct.
+# 2014-09-15
+# o BUG FIX: Now getPathname(..., relative=FALSE) returns the absolute
+#   pathname.
+# 2014-09-02
+# o Added getData() to DevEvalFileProduct.
 # 2013-09-17
 # o ROBUSTNESS: Now getDataURI() throws an Exception is suggested
 #   package 'base64enc' is not installed.
