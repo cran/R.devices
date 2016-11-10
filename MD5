@@ -1,6 +1,6 @@
-3527d8cf539789331b3cac39ea69e4de *DESCRIPTION
+4fbe03903536dcc0118e622052f5e6e2 *DESCRIPTION
 fcdb482c62cbac5de75efe16e4df72f0 *NAMESPACE
-85200c805955e3a65791ec94bd34a733 *NEWS
+68530d64234e23e7f368f7ac84945303 *NEWS
 5b3e0291bcc049d9ada9005162c5259a *R/000.R
 9aef5b978ea127a64c2cc84e5bdbf7d8 *R/006.fixVarArgs.R
 219b1be2d39dd583daebe5f939b24019 *R/999.NonDocumentedObjects.R
@@ -9,7 +9,7 @@ c557047cba25b12806449526c1f9c782 *R/999.package.R
 28f8c76e9f9d5e75e61dd4cf8cfe4010 *R/capabilitiesX11.R
 feee3c8e8f2b004e54e218116d37f6fa *R/capturePlot.R
 9883c4fedc4c6e078620d85de06c28e5 *R/devEval.R
-aeb83db2202a3cb8ce57e0f9b7e02def *R/devNew.R
+affd1036510b540f7f9ba9916ddf134f *R/devNew.R
 b96b27c909751031ec0b38bf9330ffa8 *R/devOptions.R
 9a28501b1f07d98ae87aef1660db04d1 *R/deviceUtils.R
 9fb0ff6d1154fb6eb7bfbb4d7e4e61ff *R/eps.R
@@ -23,7 +23,7 @@ c2c7304d136de09fdd57bd34918201d2 *R/utils.R
 7bcd816817be907ab43ffcb56e8a0942 *R/zzz.R
 cac0d94421f50c0343fcdf76eb8f6a07 *build/vignette.rds
 ca07cb05cb0e12e0e3b27e04bfc7e51f *inst/doc/R.devices-overview.R
-7335daa3dba1abbf1ff2f4e50ee89163 *inst/doc/R.devices-overview.pdf
+3d919cb2185736ca0431bc7468c17a24 *inst/doc/R.devices-overview.pdf
 4074ebe1a803c374fe3872bcc6f2c14e *inst/doc/R.devices-overview.tex.rsp
 deabd2463cf57911860991cd889714ec *inst/exdata/capturePlot,ostype=unix,arch=i686,ptrsize=4,endian=little.rds
 620d1ac549c67774c22f0f6ca502b0c1 *inst/exdata/capturePlot,ostype=unix,arch=x86_64,ptrsize=8,endian=little.rds
@@ -32,7 +32,7 @@ c0702cffefc35276a5c9484d6c3e3a99 *inst/exdata/capturePlot,ostype=windows,arch=i3
 e2f79c537330eba0050e4a257df63025 *man/DevEvalFileProduct.Rd
 358206844b864b01f3c4658fcda87b7c *man/DevEvalProduct.Rd
 e7c9246595c94db473c71529b625b5ef *man/Non-documented_objects.Rd
-ac686a2546158ab39e4c5fc8ccca840c *man/R.devices-package.Rd
+bbee51ab1902373236bf4bf163b3a4dd *man/R.devices-package.Rd
 7d79a43a0b3a1d03ae879aa6e1c3deca *man/architecture.Rd
 e3f7a73949478ab39cd1f5e56eda8598 *man/as.character.DevEvalProduct.Rd
 6ce10f95fbe8190c8dc17de0b4d4b4a6 *man/capabilitiesX11.Rd
@@ -63,7 +63,7 @@ bb5b851df020697ca607685376783436 *man/toNNN.Rd
 d525f3e7b31acbf38c2e8e94a09c5cf1 *tests/DevEvalFileProduct.R
 d7f69f7da59d492a02bebef5c8a036e4 *tests/DevEvalProduct.R
 bb0e76592d87e63c4cc20fdb7e5b1ad7 *tests/capabilitiesX11.R
-ab77b8e39aef4131630846495a6e0a1e *tests/capturePlot.R
+1119cfe6cc0a298f367efd88823fe1cf *tests/capturePlot.R
 1f931cd70ec00b72f84ff01764624801 *tests/dataURI.R
 fb0894dcc45db91cbd3d96518c97a119 *tests/devAll.R
 46e88e3071a7b3235e7bd70c5fd5358e *tests/devDump.R
