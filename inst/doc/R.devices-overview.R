@@ -1,10 +1,10 @@
 ###########################################################################
-## This 'tangle' R script was created from an RSP document.
-## RSP source document: './R.devices-overview.tex.rsp'
-## Metadata 'title': 'R.devices overview'
-## Metadata 'author': 'Henrik Bengtsson'
-## Metadata 'engine': 'R.rsp::rsp'
-## Metadata 'keywords': 'devices, graphics, plots, figures'
+### This 'tangle' R script was created from an RSP document.
+### RSP source document: './R.devices-overview.tex.rsp'
+### Metadata 'title': 'R.devices overview'
+### Metadata 'author': 'Henrik Bengtsson'
+### Metadata 'engine': 'R.rsp::rsp'
+### Metadata 'keywords': 'devices, graphics, plots, figures'
 ###########################################################################
 
 t0 <- Sys.time()
