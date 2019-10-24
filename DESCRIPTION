@@ -1,5 +1,5 @@
 Package: R.devices
-Version: 2.16.0
+Version: 2.16.1
 Depends: R (>= 2.14.0)
 Imports: grDevices, R.methodsS3 (>= 1.7.1), R.oo (>= 1.21.0), R.utils
         (>= 2.6.0), base64enc (>= 0.1-2)
@@ -9,7 +9,6 @@ Authors@R: c(person("Henrik", "Bengtsson", role=c("aut", "cre", "cph"),
                                           email = "henrikb@braju.com"))
 Author: Henrik Bengtsson [aut, cre, cph]
 Maintainer: Henrik Bengtsson <henrikb@braju.com>
-Date: 2018-07-21
 Title: Unified Handling of Graphics Devices
 Description: Functions for creating plots and image files in a unified way
     regardless of output format (EPS, PDF, PNG, SVG, TIFF, WMF, etc.). Default
@@ -22,8 +21,7 @@ License: LGPL (>= 2.1)
 URL: https://github.com/HenrikBengtsson/R.devices
 BugReports: https://github.com/HenrikBengtsson/R.devices/issues
 LazyLoad: TRUE
-RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2018-07-21 12:07:46 UTC; hb
+Packaged: 2019-10-23 04:00:55 UTC; hb
 Repository: CRAN
-Date/Publication: 2018-07-21 12:30:03 UTC
+Date/Publication: 2019-10-24 06:00:03 UTC

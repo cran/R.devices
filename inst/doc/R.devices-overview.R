@@ -1,6 +1,6 @@
 ###########################################################################
 ### This 'tangle' R script was created from an RSP document.
-### RSP source document: './R.devices-overview.tex.rsp'
+### RSP source document: 'R.devices-overview.tex.rsp'
 ### Metadata 'title': 'R.devices overview'
 ### Metadata 'author': 'Henrik Bengtsson'
 ### Metadata 'engine': 'R.rsp::rsp'
