@@ -13,8 +13,13 @@ R.rsp <- R.oo::Package("R.rsp")
 withCapture <- R.utils::withCapture
 hpaste <- R.utils::hpaste
 
-devOptions("png", width=840)
-devOptions("png", field="fullname") # Better for LaTeX
+for (type in c("png", "cairo_png", "CairoPNG", "png2")) {
+  if (type %in% rownames(devOptions())) {
+    devOptions(type, width=840)
+    devOptions(type, field="fullname") # Better for LaTeX
+  }
+}
+
 options(width=85)
 options(digits=3)
 options(str=strOptions(strict.width="cut"))
@@ -28,15 +33,15 @@ hpaste(sprintf("\\code{%s}", tos), maxHead=Inf, lastCollapse=", and ")
 toPDF("MyGaussianDensity", aspectRatio=0.6, {
    curve(dnorm, from=-5, to=+5)
   })
-devOptions("png", reset=TRUE)
+devOptions("pdf", reset=TRUE)
 withCapture({
-devOptions("png")
+str(devOptions("pdf"))
 })
 withCapture({
-devOptions("png", width=1024, bg="lightblue")
+devOptions("pdf", width=5, bg="lightblue")
 })
 withCapture({
-devOptions("png", reset=TRUE)
+devOptions("pdf", reset=TRUE)
 })
 withCapture({
 devOptions()[,c("width", "height", "bg", "fg", "pointsize")]
