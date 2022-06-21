@@ -1,6 +1,6 @@
-35e1e9c195106b406245db886fd6998c *DESCRIPTION
-4b825fb9d45f583f604dc70d9cd42d19 *NAMESPACE
-2ea924352b29e37ae9e52f835feca787 *NEWS
+363ce96ebe33e8a713b7fb828feceb6c *DESCRIPTION
+fff771528872d2c9d5cd2fd6d89250b3 *NAMESPACE
+feb9578c223813b922f42828f463ea3c *NEWS.md
 5b3e0291bcc049d9ada9005162c5259a *R/000.R
 ad5e7399922835e9d949b4ede7973e23 *R/999.NonDocumentedObjects.R
 c557047cba25b12806449526c1f9c782 *R/999.package.R
@@ -22,11 +22,11 @@ ccb41c35769f3ac5a90c3a575d062056 *R/suppressGraphics.R
 5fea8eaf7d1230d3edb59957da1e21bf *R/utils.R
 bdb585b9166175b9314d394c7c60e6a3 *R/withPar.R
 1201a3b3ecd5dcb93ac226bdeafaf335 *R/zzz.R
-4aa52f52e2b544ea643896bfdc767d94 *build/vignette.rds
+6e4bf52a8d743f11b8c614ecfbf293de *build/vignette.rds
 aaa29ff65c051ddf9c82ddb81f360295 *inst/WORDLIST
 40e2c015556213a03f5a3e575d687743 *inst/doc/R.devices-overview.R
-26100f3f0ce7964d9e5b265287bb08be *inst/doc/R.devices-overview.pdf
-15e3f960437d9094ce04a7f8a1325cc6 *inst/doc/R.devices-overview.tex.rsp
+214053331d85e1a9248fb0b4af2b33eb *inst/doc/R.devices-overview.pdf
+36a16c35ae6cd246a10a15a3fbb89192 *inst/doc/R.devices-overview.tex.rsp
 deabd2463cf57911860991cd889714ec *inst/exdata/capturePlot,engine=11,ostype=unix,arch=i686,ptrsize=4,endian=little.rds
 620d1ac549c67774c22f0f6ca502b0c1 *inst/exdata/capturePlot,engine=11,ostype=unix,arch=x86_64,ptrsize=8,endian=little.rds
 c0702cffefc35276a5c9484d6c3e3a99 *inst/exdata/capturePlot,engine=11,ostype=windows,arch=i386,ptrsize=4,endian=little.rds
@@ -34,7 +34,7 @@ c0702cffefc35276a5c9484d6c3e3a99 *inst/exdata/capturePlot,engine=11,ostype=windo
 b858c1ecb4c363831ae618f4ac35068e *man/DevEvalFileProduct.Rd
 358206844b864b01f3c4658fcda87b7c *man/DevEvalProduct.Rd
 e7c9246595c94db473c71529b625b5ef *man/Non-documented_objects.Rd
-3e17037fa4f1f4897c788a27799e5d12 *man/R.devices-package.Rd
+d9906154c733bd8f81f643d280d9c4d3 *man/R.devices-package.Rd
 ed050c99c6ec3c7f0c27f22db908c7ee *man/architecture.Rd
 e3f7a73949478ab39cd1f5e56eda8598 *man/as.character.DevEvalProduct.Rd
 6ce10f95fbe8190c8dc17de0b4d4b4a6 *man/capabilitiesX11.Rd
@@ -84,4 +84,4 @@ c8e6ad38f480c2fefc266a2e35c7b25c *tests/devTypeName.R
 d747528aad1b79a655cbf13e96b8335f *tests/favicon.R
 8d97622c81bbf119649a1bb9405fa14c *tests/toNNN.R
 7dcd7b282c789ae27962b66844a3fd91 *tests/withPar.R
-15e3f960437d9094ce04a7f8a1325cc6 *vignettes/R.devices-overview.tex.rsp
+36a16c35ae6cd246a10a15a3fbb89192 *vignettes/R.devices-overview.tex.rsp
