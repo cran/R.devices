@@ -1,6 +1,6 @@
-363ce96ebe33e8a713b7fb828feceb6c *DESCRIPTION
+f59e592752af320f318c8f58b96e0247 *DESCRIPTION
 fff771528872d2c9d5cd2fd6d89250b3 *NAMESPACE
-feb9578c223813b922f42828f463ea3c *NEWS.md
+0118ccddb0f337bed671e0cb20ac3daa *NEWS.md
 5b3e0291bcc049d9ada9005162c5259a *R/000.R
 ad5e7399922835e9d949b4ede7973e23 *R/999.NonDocumentedObjects.R
 c557047cba25b12806449526c1f9c782 *R/999.package.R
@@ -10,9 +10,9 @@ c557047cba25b12806449526c1f9c782 *R/999.package.R
 6f5d208fb8d90b69b4fd3def9d99ad1d *R/devEval.R
 ecc785ebe74108d2cd0d46ce047b677b *R/devNew.R
 700cfce7847f2ba040f105915a69794f *R/devOptions.R
-d277bd6fcfadf68b9c3c84f1bf37f51d *R/deviceUtils.R
+6f99b47cde80ee5810333ce9552cf9a1 *R/deviceUtils.R
 0c4c099bd290f4a37c4d69245668babe *R/eps.R
-fd613cf73f01cf823d6e80095becacee *R/favicon.R
+c1d7186b23562f5167192eaf111bbef4 *R/favicon.R
 13b952e74f367f4c90e0b2af8ef18f6a *R/jpeg2.R
 0b5c38d6c440aa837549cb0c369244f7 *R/nulldev.R
 f237541b97ee76766921a328bfa1a4c0 *R/png2.R
@@ -22,11 +22,11 @@ ccb41c35769f3ac5a90c3a575d062056 *R/suppressGraphics.R
 5fea8eaf7d1230d3edb59957da1e21bf *R/utils.R
 bdb585b9166175b9314d394c7c60e6a3 *R/withPar.R
 1201a3b3ecd5dcb93ac226bdeafaf335 *R/zzz.R
-6e4bf52a8d743f11b8c614ecfbf293de *build/vignette.rds
+761d570fed62a6db75e662e6d4e6e067 *build/vignette.rds
 aaa29ff65c051ddf9c82ddb81f360295 *inst/WORDLIST
-40e2c015556213a03f5a3e575d687743 *inst/doc/R.devices-overview.R
-214053331d85e1a9248fb0b4af2b33eb *inst/doc/R.devices-overview.pdf
-36a16c35ae6cd246a10a15a3fbb89192 *inst/doc/R.devices-overview.tex.rsp
+e237c2b8e1885c6d27ababdbb483d3fc *inst/doc/R.devices-overview.R
+05f57f50370f718502ffe079848efec6 *inst/doc/R.devices-overview.pdf
+295eda4b6bf9bd759edea4bb633f306e *inst/doc/R.devices-overview.tex.rsp
 deabd2463cf57911860991cd889714ec *inst/exdata/capturePlot,engine=11,ostype=unix,arch=i686,ptrsize=4,endian=little.rds
 620d1ac549c67774c22f0f6ca502b0c1 *inst/exdata/capturePlot,engine=11,ostype=unix,arch=x86_64,ptrsize=8,endian=little.rds
 c0702cffefc35276a5c9484d6c3e3a99 *inst/exdata/capturePlot,engine=11,ostype=windows,arch=i386,ptrsize=4,endian=little.rds
@@ -34,7 +34,7 @@ c0702cffefc35276a5c9484d6c3e3a99 *inst/exdata/capturePlot,engine=11,ostype=windo
 b858c1ecb4c363831ae618f4ac35068e *man/DevEvalFileProduct.Rd
 358206844b864b01f3c4658fcda87b7c *man/DevEvalProduct.Rd
 e7c9246595c94db473c71529b625b5ef *man/Non-documented_objects.Rd
-d9906154c733bd8f81f643d280d9c4d3 *man/R.devices-package.Rd
+945c1c730bd37fb52d879b4f71292161 *man/R.devices-package.Rd
 ed050c99c6ec3c7f0c27f22db908c7ee *man/architecture.Rd
 e3f7a73949478ab39cd1f5e56eda8598 *man/as.character.DevEvalProduct.Rd
 6ce10f95fbe8190c8dc17de0b4d4b4a6 *man/capabilitiesX11.Rd
@@ -51,7 +51,7 @@ a16d7307777b2a863d0002227b7c3acf *man/devNew.Rd
 b8c1c7afb125d1c40030ffa747810b1b *man/devSet.Rd
 24101170edbf98c51f02899e98e7e4c6 *man/devSetLabel.Rd
 ce14fbf921b43ebbe0207912e1b4deb8 *man/eps.Rd
-d6c6124b5c17f4a08313d2ac9b6629fa *man/favicon.Rd
+bfd1094aa99700af295ffc3cd516ac50 *man/favicon.Rd
 6e43037a78b117580ac309c142893aaa *man/getDataURI.DevEvalFileProduct.Rd
 b87e84f67ae177e5c8d94819ad526555 *man/getFullname.DevEvalProduct.Rd
 55c96844257223ac7bd7fdc9de57c6a7 *man/getMimeType.DevEvalFileProduct.Rd
@@ -84,4 +84,4 @@ c8e6ad38f480c2fefc266a2e35c7b25c *tests/devTypeName.R
 d747528aad1b79a655cbf13e96b8335f *tests/favicon.R
 8d97622c81bbf119649a1bb9405fa14c *tests/toNNN.R
 7dcd7b282c789ae27962b66844a3fd91 *tests/withPar.R
-36a16c35ae6cd246a10a15a3fbb89192 *vignettes/R.devices-overview.tex.rsp
+295eda4b6bf9bd759edea4bb633f306e *vignettes/R.devices-overview.tex.rsp

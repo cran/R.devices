@@ -47,5 +47,3 @@ withCapture({
 devOptions()[,c("width", "height", "bg", "fg", "pointsize")]
 })
 toLatex(sessionInfo())
-dt <- round(Sys.time()-t0, digits=2)
-attr(dt, "units")

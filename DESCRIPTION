@@ -1,5 +1,5 @@
 Package: R.devices
-Version: 2.17.1
+Version: 2.17.2
 Depends: R (>= 2.14.0)
 Imports: grDevices, R.methodsS3 (>= 1.8.1), R.oo (>= 1.24.0), R.utils
         (>= 2.10.1), base64enc (>= 0.1-2)
@@ -18,10 +18,11 @@ Description: Functions for creating plots and image files in a unified way
     will never leave open graphics devices or incomplete image files behind, even on
     errors or user interrupts.
 License: LGPL (>= 2.1)
-URL: https://github.com/HenrikBengtsson/R.devices
+URL: https://henrikbengtsson.github.io/R.devices/,
+        https://github.com/HenrikBengtsson/R.devices
 BugReports: https://github.com/HenrikBengtsson/R.devices/issues
 LazyLoad: TRUE
 NeedsCompilation: no
-Packaged: 2022-06-21 07:25:33 UTC; hb
+Packaged: 2024-01-29 04:44:38 UTC; henrik
 Repository: CRAN
-Date/Publication: 2022-06-21 08:00:02 UTC
+Date/Publication: 2024-01-29 13:30:11 UTC
